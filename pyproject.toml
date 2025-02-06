@@ -16,6 +16,7 @@ langchain-openai = "^0.3.3"
 langchain-community = "^0.3.16"
 langchain-experimental = "^0.3.4"
 langgraph = "^0.2.69"
+redis = "^5.2.1"
 
 
 [tool.poetry.group.dev.dependencies]
