@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "apps"
+version = "0.1.0"
+description = ""
+authors = ["Jae hyeon <wjs2063@naver.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.8"
+pytest = "^8.3.4"
+tortoise-orm = "^0.24.0"
+langchain = "^0.3.17"
+langchain-core = "^0.3.33"
+langchain-openai = "^0.3.3"
+langchain-community = "^0.3.16"
+langchain-experimental = "^0.3.4"
+langgraph = "^0.2.69"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.15.0"
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
