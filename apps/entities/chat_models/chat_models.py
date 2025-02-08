@@ -1,7 +1,7 @@
 """
 ChatModel
 """
-
+import logging
 import typing
 import uuid
 from typing import Optional, Any, Sequence, Union, Callable, Iterator
@@ -12,6 +12,13 @@ from langchain_core.messages import BaseMessage
 from langchain_core.outputs import LLMResult, ChatResult, ChatGenerationChunk
 from langchain_core.runnables import Runnable
 from langchain_core.tools import BaseTool
+from langchain_openai import ChatOpenAI
+from langchain_core.runnables import ConfigurableField
+from langchain.chat_models import init_chat_model
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class CustomChatModel(BaseChatModel):
