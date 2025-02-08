@@ -3,7 +3,7 @@
 
 services:
   gai-redis:
-    image: "redis:alpine"
+    image: "redis/redis-stack-server"
     ports:
       - "6378:6379"
     tty: true
