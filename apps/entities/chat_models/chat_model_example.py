@@ -44,12 +44,12 @@ caching example
 prompt_example
 """
 
-from prompt import prompt
-
-print(prompt.format(product="아이폰"))
-print(prompt.format(product="갤럭시"))
-
-print()
+# from prompt import prompt
+#
+# print(prompt.format(product="아이폰"))
+# print(prompt.format(product="갤럭시"))
+#
+# print()
 
 """
 prompt_with_chat_models
