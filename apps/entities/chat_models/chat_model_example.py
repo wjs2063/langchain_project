@@ -101,3 +101,28 @@ chat_models_example with streaming output
 # llm([
 #     HumanMessage(content="트럼프와 비트코인의 관계에 대해서 알려주세요")
 # ])
+
+"""
+memory chat_model_example 
+"""
+
+# from apps.entities.memories.memory import conversation_buffer_memory
+#
+# memory_message_result = conversation_buffer_memory.load_memory_variables({})
+# for _ in range(3):
+#     message = input()
+#
+#     message_history = memory_message_result["history"]
+#
+#     message_history.append(HumanMessage(content=message))
+#
+#     result = llm(message_history)
+#
+#     conversation_buffer_memory.save_context(
+#         {
+#             "input": message
+#         },
+#         {"output": result.content}
+#     )
+#
+#     print(result)
