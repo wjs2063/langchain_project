@@ -76,13 +76,12 @@ Wikipedia retrieval example
 """
 
 wikipedia_retrieval = WikipediaRetriever(
+    wiki_client="wikipedia",
     lang="ko",
     doc_content_chars_max=300,
     top_k_results=1,
 )
 
-documents = wikipedia_retrieval.get_relevant_documents(
-    "대구"
-)
+documents = wikipedia_retrieval.get_relevant_documents("대구")
 
 print(documents)
