@@ -1,5 +1,5 @@
 import chainlit as cl
-from infras.redis._redis import _redis_url
+from apps.infras.redis._redis import _redis_url
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain.memory import (
     ConversationBufferWindowMemory,
@@ -7,7 +7,8 @@ from langchain.memory import (
 )
 from langchain.schema import HumanMessage, AIMessage
 from langchain.chains.conversation.base import ConversationChain
-from entities.chat_models.chat_model_example import llm
+from apps.entities.memories.history import SlidingWindowBufferRedisChatMessageHistory
+from apps.entities.chat_models.chat_model_example import llm
 
 
 @cl.on_chat_start
@@ -22,20 +23,24 @@ async def main():
             print(res)
             user_session_id = res["output"].strip()
 
-    history = RedisChatMessageHistory(
-        session_id=user_session_id,
-        url=_redis_url,
+    # history = RedisChatMessageHistory(
+    #     session_id=user_session_id,
+    #     url=_redis_url,
+    # )
+    history = SlidingWindowBufferRedisChatMessageHistory(
+        session_id=user_session_id, url=_redis_url, buffer_size=8
     )
 
+    print(len(history.messages))
+
     memory = ConversationSummaryBufferMemory(
-        llm=llm, chat_memory=history, return_messages=True, k=3
+        llm=llm, chat_memory=history, return_messages=True, max_token_limit=50
     )
     chain = ConversationChain(memory=memory, llm=llm)
 
     memory_message_result = chain.memory.load_memory_variables({})
 
     messages = memory_message_result["history"]
-    print(memory_message_result)
     for message in messages:
         if isinstance(message, HumanMessage):
             await cl.Message(author="User", content=f"{message.content}").send()
