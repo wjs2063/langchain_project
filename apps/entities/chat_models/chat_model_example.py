@@ -10,7 +10,6 @@ warnings.filterwarnings("ignore")
 
 load_dotenv()
 llm = ChatOpenAI(model="gpt-4o", temperature=0)
-
 # Function to measure execution time
 import time
 from apps.entities.caches.caches import redis_cache
@@ -123,6 +122,41 @@ memory chat_model_example
 #             "input": message
 #         },
 #         {"output": result.content}
+#     )
+#
+#     print(result)
+
+
+"""
+RedisChatMessageHistory with session_id
+"""
+
+# from langchain.memory import RedisChatMessageHistory
+# from apps.entities.caches.caches import _redis_url
+# from apps.entities.memories.memory import conversation_buffer_memory
+#
+#
+# ## session_id 만 변경하면 redis 특정id에 대한 기록 가져옴 -> session_id만 유지하면 가능함
+# redis_history = RedisChatMessageHistory(session_id=None, url=_redis_url)
+# redis_history.session_id = "123"
+# conversation_buffer_memory.chat_memory = redis_history
+#
+# memory_message_result = conversation_buffer_memory.load_memory_variables({})
+# # print(memory_message_result)
+# for _ in range(3):
+#     message = input()
+#
+#     if message == "quit":
+#         break
+#
+#     message_history = memory_message_result["history"]
+#
+#     message_history.append(HumanMessage(content=message))
+#
+#     result = llm(message_history)
+#
+#     conversation_buffer_memory.save_context(
+#         {"input": message}, {"output": result.content}
 #     )
 #
 #     print(result)
