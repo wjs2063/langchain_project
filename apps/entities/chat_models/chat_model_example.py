@@ -12,7 +12,7 @@ load_dotenv()
 llm = ChatOpenAI(model="gpt-4o", temperature=0)
 # Function to measure execution time
 import time
-from apps.entities.caches.caches import redis_cache
+from entities.caches.caches import redis_cache
 
 """
 caching example
