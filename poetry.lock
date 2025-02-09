@@ -296,7 +296,7 @@ lxml = ["lxml"]
 name = "black"
 version = "25.1.0"
 description = "The uncompromising code formatter."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.9"
 files = [
@@ -2954,7 +2954,7 @@ files = [
 name = "pathspec"
 version = "0.12.1"
 description = "Utility library for gitignore style pattern matching of file paths."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -2966,7 +2966,7 @@ files = [
 name = "platformdirs"
 version = "4.3.6"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -5139,4 +5139,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "38b3edc028f30ce76363a9636e56bdfe8f7406e6d39d62e4e68278cd05b9272a"
+content-hash = "bf7f0980c10baedd9c3c0b5195856f591198aabdbf3e53afad077f68fcbba140"
