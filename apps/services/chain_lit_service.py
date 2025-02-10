@@ -7,7 +7,9 @@ from langchain.memory import (
 )
 from langchain.schema import HumanMessage, AIMessage
 from langchain.chains.conversation.base import ConversationChain
-from apps.entities.memories.history import SlidingWindowBufferRedisChatMessageHistory
+from apps.entities.memories.history import (
+    SlidingWindowBufferRedisChatMessageHistory,
+)
 from apps.entities.chat_models.chat_model_example import llm
 
 
@@ -16,11 +18,10 @@ async def main():
     user_session_id = None
     while not user_session_id:
         res = await cl.AskUserMessage(
-            content="나는 기억할수있는 채팅봇이야! 너를 알아볼수있도록 비밀 password를 지정해줘!",
+            content="나는 기억할수있는 채팅봇이야! 너를 알아볼수있도록 password를 지정해줘!",
             timeout=240,
         ).send()
         if res:
-            print(res)
             user_session_id = res["output"].strip()
 
     # history = RedisChatMessageHistory(
@@ -30,6 +31,11 @@ async def main():
     history = SlidingWindowBufferRedisChatMessageHistory(
         session_id=user_session_id, url=_redis_url, buffer_size=8
     )
+    # history = AsyncRedisChatMessageHistory(
+    #     session_id=user_session_id, url=_redis_url, buffer_size=8
+    # )
+
+    print(history)
 
     print(len(history.messages))
 
@@ -38,7 +44,7 @@ async def main():
     )
     chain = ConversationChain(memory=memory, llm=llm)
 
-    memory_message_result = chain.memory.load_memory_variables({})
+    memory_message_result = await chain.memory.aload_memory_variables({})
 
     messages = memory_message_result["history"]
     for message in messages:
