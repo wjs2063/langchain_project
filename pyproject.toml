@@ -27,6 +27,7 @@ langchain-chroma = "^0.2.1"
 wikipedia = "^1.4.0"
 black = "^25.1.0"
 chainlit = "^2.2.0"
+langchain-milvus = "^0.1.8"
 
 
 [tool.poetry.group.dev.dependencies]
