@@ -44,3 +44,4 @@ load_dotenv()
 #         Union[typing.Dict[str, Any], type, Callable, BaseTool]  # noqa: UP006
 #     ], **kwargs: Any) -> Runnable[LanguageModelInput, BaseMessage]:
 #         pass
+base_chat = ChatOpenAI(model="gpt-4o", temperature=0)
