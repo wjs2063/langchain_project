@@ -86,7 +86,7 @@ print(res)
 
 from langchain_core.documents import Document
 
-#
+# embedding 모델과 분할된 documents 들을 벡터라이징후 벡터스토어에 삽입
 vector_store_saved = Milvus.from_documents(
     splitted_documents,
     embedding=embeddings,
