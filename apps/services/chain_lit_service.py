@@ -11,25 +11,55 @@ from apps.entities.memories.history import (
     SlidingWindowBufferRedisChatMessageHistory,
 )
 from apps.entities.chat_models.chat_model_example import llm
+from apps.entities.auth.model import User, User_Pydantic
+from apps.entities.auth.crypt_passwd import pwd_context
+from apps.entities.auth.schema import UserSchema
+from tortoise import run_async
+from random import randint
+
+
+async def get_user(user_id: str, password: str):
+    res = await User.filter(user_id=user_id).first()
+    if not res:
+        raise ValueError(f"회원가입을 진행해주세요")
+    if not pwd_context.verify(password, res.password):
+        raise ValueError("id와 password 를 확인해주세요")
+    return UserSchema(**(await User_Pydantic.from_tortoise_orm(res)).dict())
+
+
+@cl.password_auth_callback
+async def auth_callback(user_id: str, password: str):
+    # res = syncify(get_user)(user_id=user_id, password=password)
+    # res = anyio.to_thread.run_sync(get_user, user_id, password, abandon_on_cancel=True)
+    res = await get_user(user_id, password)
+    # session_id
+    # cl.user_session.set("user_id", res.user_id)
+    # print(res, cl.user_session)
+
+    return cl.User(
+        identifier="user", metadata={"role": "user", "provider": "credentials"}
+    )
+    # if (user_id, password) == ("admin", "admin"):
+    #     return cl.User(
+    #         identifier="admin", metadata={"role": "admin", "provider": "credentials"}
 
 
 @cl.on_chat_start
 async def main():
-    user_session_id = None
-    while not user_session_id:
-        res = await cl.AskUserMessage(
-            content="나는 기억할수있는 채팅봇이야! 너를 알아볼수있도록 password를 지정해줘!",
-            timeout=240,
-        ).send()
-        if res:
-            user_session_id = res["output"].strip()
+    user_session_id = randint(0, 100000)
+    if not user_session_id:
+        await cl.Message(content="로그인 정보가 없습니다. 다시 로그인해주세요.").send()
+        return
+    res = await cl.Message(
+        content=f"안녕하세요! {user_session_id}님! 무엇을 도와드릴까요?!",
+    ).send()
 
     # history = RedisChatMessageHistory(
     #     session_id=user_session_id,
     #     url=_redis_url,
     # )
     history = SlidingWindowBufferRedisChatMessageHistory(
-        session_id=user_session_id, url=_redis_url, buffer_size=8
+        session_id="", url=_redis_url, buffer_size=8
     )
     # history = AsyncRedisChatMessageHistory(
     #     session_id=user_session_id, url=_redis_url, buffer_size=8
