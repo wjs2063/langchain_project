@@ -166,6 +166,7 @@ RedisChatMessageHistory with session_id
 chat_model_example with tools(tavily)
 """
 from apps.entities.tools.tavily.tavily_search import tavily_tools
+from langchain.agents import initialize_agent, AgentType
 from langgraph.prebuilt import create_react_agent
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
@@ -177,10 +178,23 @@ chat_model_with_tool.bind_tools(tavily_tools)
 # print(f"Content : {response.content}")
 # print(f"ToolCalls : {response.tool_calls}")
 
-tavily_agent = create_react_agent(model=chat_model_with_tool, tools=tavily_tools)
+# tavily_agent = create_react_agent(
+#     model=chat_model_with_tool,
+#     tools=tavily_tools,
+# )
 
-response = tavily_agent.invoke(
-    {"messages": [HumanMessage(content="whats the weather in seoul?")]}
+tavily_agent = initialize_agent(
+    llm=chat_model_with_tool,
+    tools=tavily_tools,
+    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+    verbose=True,
 )
+response = tavily_agent.invoke(
+    "현재 서울날씨 알려줘, 현재날짜(연,월,일,시간),현재날씨,온도,바람 정보만 알려줘",
+    max_iterations=1,
+)
+# response = tavily_agent.invoke(
+#     {"messages": [HumanMessage(content="whats the weather in seoul?")]}
+# )
 
-print(response["messages"])
+print(response)
