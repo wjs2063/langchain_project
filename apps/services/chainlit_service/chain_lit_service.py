@@ -37,7 +37,7 @@ async def auth_callback(user_id: str, password: str):
     # print(res, cl.user_session)
 
     return cl.User(
-        identifier="user", metadata={"role": "user", "provider": "credentials"}
+        identifier="admin", metadata={"role": "admin", "provider": "credentials"}
     )
     # if (user_id, password) == ("admin", "admin"):
     #     return cl.User(
@@ -46,28 +46,17 @@ async def auth_callback(user_id: str, password: str):
 
 @cl.on_chat_start
 async def main():
-    user_session_id = randint(0, 100000)
+    user_session_id = "jaehyeon"
     if not user_session_id:
         await cl.Message(content="로그인 정보가 없습니다. 다시 로그인해주세요.").send()
         return
-    res = await cl.Message(
+    await cl.Message(
         content=f"안녕하세요! {user_session_id}님! 무엇을 도와드릴까요?!",
     ).send()
 
-    # history = RedisChatMessageHistory(
-    #     session_id=user_session_id,
-    #     url=_redis_url,
-    # )
     history = SlidingWindowBufferRedisChatMessageHistory(
-        session_id="", url=_redis_url, buffer_size=8
+        session_id=user_session_id, url=_redis_url, buffer_size=8
     )
-    # history = AsyncRedisChatMessageHistory(
-    #     session_id=user_session_id, url=_redis_url, buffer_size=8
-    # )
-
-    print(history)
-
-    print(len(history.messages))
 
     memory = ConversationSummaryBufferMemory(
         llm=llm, chat_memory=history, return_messages=True, max_token_limit=50
@@ -91,6 +80,5 @@ from chainlit.message import Message
 @cl.on_message
 async def on_message(message: Message):
     chain = cl.user_session.get("chain")
-    print(message.content)
-    result = chain(message.content)
+    result = await chain.ainvoke(message.content)
     await cl.Message(content=result["response"]).send()
