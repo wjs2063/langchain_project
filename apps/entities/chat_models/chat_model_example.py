@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 warnings.filterwarnings("ignore")
 
 load_dotenv()
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+llm = ChatOpenAI(model="gpt-4o", temperature=0.5)
 # Function to measure execution time
 import time
 from apps.entities.caches.caches import redis_cache
