@@ -14,6 +14,7 @@ from apps.entities.chat_models.chat_model_example import llm
 from apps.entities.auth.model import User, User_Pydantic
 from apps.entities.auth.crypt_passwd import pwd_context
 from apps.entities.auth.schema import UserSchema
+from apps.services.chainlit_service.prompt import chainlit_prompt
 from tortoise import run_async
 from random import randint
 
@@ -46,7 +47,7 @@ async def auth_callback(user_id: str, password: str):
 
 @cl.on_chat_start
 async def main():
-    user_session_id = "jaehyeon"
+    user_session_id = "jaehyeon1"
     if not user_session_id:
         await cl.Message(content="로그인 정보가 없습니다. 다시 로그인해주세요.").send()
         return
@@ -58,15 +59,18 @@ async def main():
         session_id=user_session_id, url=_redis_url, buffer_size=8
     )
 
-    memory = ConversationSummaryBufferMemory(
-        llm=llm, chat_memory=history, return_messages=True, max_token_limit=50
+    memory = ConversationBufferWindowMemory(
+        llm=llm, chat_memory=history, return_messages=True, max_token_limit=50, k=8
     )
-    chain = ConversationChain(memory=memory, llm=llm)
+    chain = ConversationChain(
+        memory=memory, llm=llm, prompt=chainlit_prompt, verbose=True
+    )
 
     memory_message_result = await chain.memory.aload_memory_variables({})
 
     messages = memory_message_result["history"]
     for message in messages:
+        print(message)
         if isinstance(message, HumanMessage):
             await cl.Message(author="User", content=f"{message.content}").send()
         else:
@@ -80,5 +84,6 @@ from chainlit.message import Message
 @cl.on_message
 async def on_message(message: Message):
     chain = cl.user_session.get("chain")
-    result = await chain.ainvoke(message.content)
-    await cl.Message(content=result["response"]).send()
+    result = await chain.apredict(input=message.content)
+    print(result)
+    await cl.Message(content=result).send()
