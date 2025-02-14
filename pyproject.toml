@@ -35,10 +35,6 @@ passlib = "^1.7.4"
 types-passlib = "^1.7.7.20241221"
 types-python-jose = "^3.3.4.20240106"
 langgraph = "^0.2.71"
-langsmith = "^0.3.8"
-langchain-anthropic = "^0.3.7"
-ipython = "^8.32.0"
-jupyter = "^1.1.1"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -6,22 +6,17 @@ from langchain.memory import (
     ConversationSummaryBufferMemory,
 )
 from langchain.schema import HumanMessage, AIMessage
+from langchain.chains.conversation.base import ConversationChain
 from apps.entities.memories.history import (
     SlidingWindowBufferRedisChatMessageHistory,
 )
-from langchain_core.runnables import RunnableWithMessageHistory
+from apps.entities.chat_models.chat_model_example import llm
 from apps.entities.auth.model import User, User_Pydantic
 from apps.entities.auth.crypt_passwd import pwd_context
 from apps.entities.auth.schema import UserSchema
-from apps.entities.chat_models.chat_models import base_chat, prompt
-from langchain_core.messages import trim_messages
-from langchain_core.runnables import ConfigurableFieldSpec
-
-
-def get_history(session_id: str):
-    return SlidingWindowBufferRedisChatMessageHistory(
-        session_id=session_id, url=_redis_url, buffer_size=8
-    )
+from apps.services.chainlit_service.prompt import chainlit_prompt
+from tortoise import run_async
+from random import randint
 
 
 async def get_user(user_id: str, password: str):
@@ -35,16 +30,24 @@ async def get_user(user_id: str, password: str):
 
 @cl.password_auth_callback
 async def auth_callback(user_id: str, password: str):
+    # res = syncify(get_user)(user_id=user_id, password=password)
+    # res = anyio.to_thread.run_sync(get_user, user_id, password, abandon_on_cancel=True)
     res = await get_user(user_id, password)
-    cl.user_session.set(res.user_id, res.user_name)
+    # session_id
+    # cl.user_session.set("user_id", res.user_id)
+    # print(res, cl.user_session)
+
     return cl.User(
         identifier="admin", metadata={"role": "admin", "provider": "credentials"}
     )
+    # if (user_id, password) == ("admin", "admin"):
+    #     return cl.User(
+    #         identifier="admin", metadata={"role": "admin", "provider": "credentials"}
 
 
 @cl.on_chat_start
 async def main():
-    user_session_id = "jaehyeon"
+    user_session_id = "jaehyeon1"
     if not user_session_id:
         await cl.Message(content="로그인 정보가 없습니다. 다시 로그인해주세요.").send()
         return
@@ -52,43 +55,27 @@ async def main():
         content=f"안녕하세요! {user_session_id}님! 무엇을 도와드릴까요?!",
     ).send()
 
-    from pydantic import BaseModel, Field
-
     history = SlidingWindowBufferRedisChatMessageHistory(
         session_id=user_session_id, url=_redis_url, buffer_size=8
     )
 
-    chain = prompt | base_chat
-    chain_with_history = RunnableWithMessageHistory(
-        chain,
-        get_session_history=get_history,
-        history_messages_key="history",  # history 의 key값
-        input_messages_key="question",  # input_message의 key값
-        # history_factory_config=[
-        #     ConfigurableFieldSpec(
-        #         id="user_id",
-        #         annotation=str,
-        #         name="User ID",
-        #         description="Unique identifier for the user.",
-        #         default="",
-        #         is_shared=True,
-        #     )
-        # ],
+    memory = ConversationBufferWindowMemory(
+        llm=llm, chat_memory=history, return_messages=True, max_token_limit=50, k=8
     )
-    buffered_history = trim_messages(
-        messages=await history.aget_messages(),
-        strategy="last",
-        # start_on="human",
-        allow_partial=False,
-        max_tokens=100,
-        token_counter=len,
+    chain = ConversationChain(
+        memory=memory, llm=llm, prompt=chainlit_prompt, verbose=True
     )
-    for message in buffered_history:
+
+    memory_message_result = await chain.memory.aload_memory_variables({})
+
+    messages = memory_message_result["history"]
+    for message in messages:
+        print(message)
         if isinstance(message, HumanMessage):
             await cl.Message(author="User", content=f"{message.content}").send()
         else:
             await cl.Message(author="VPA", content=f"{message.content}").send()
-    cl.user_session.set("chain", chain_with_history)
+    cl.user_session.set("chain", chain)
 
 
 from chainlit.message import Message
@@ -97,9 +84,6 @@ from chainlit.message import Message
 @cl.on_message
 async def on_message(message: Message):
     chain = cl.user_session.get("chain")
-    result = await chain.ainvoke(
-        {"question": message.content, "ability": "chatting"},
-        config={"configurable": {"session_id": "jaehyeon", "user_id": "jaehyeon"}},
-    )
+    result = await chain.apredict(input=message.content)
     print(result)
-    await cl.Message(content=result.content).send()
+    await cl.Message(content=result).send()

@@ -1,5 +1,4 @@
 from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain_core.prompts.prompt import PromptTemplate
 from dotenv import load_dotenv
 
 load_dotenv()
