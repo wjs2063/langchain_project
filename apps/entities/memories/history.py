@@ -5,6 +5,7 @@ from langchain_community.cache import AsyncRedisCache
 from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict
 import json
 from typing import Optional, Sequence
+from langchain_core.runnables.config import run_in_executor
 import asyncio
 import redis.asyncio as redis
 
@@ -52,6 +53,24 @@ class SlidingWindowBufferRedisChatMessageHistory(RedisChatMessageHistory):
         self.redis_client.ltrim(self.key, 0, self.buffer_size - 1)
         if self.ttl:
             self.redis_client.expire(self.key, self.ttl)
+
+    async def aget_messages(self) -> BaseMessage:
+        return await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: self.messages,
+        )
+
+    async def _aadd_message(self, message: BaseMessage) -> None:
+        """Append the message to the record in Redis"""
+        await self.redis_client.lpush(self.key, json.dumps(message_to_dict(message)))
+        await self.redis_client.ltrim(self.key, 0, self.buffer_size - 1)
+        if self.ttl:
+            await self.redis_client.expire(self.key, self.ttl)
+
+    async def aadd_message(self, message: BaseMessage) -> None:
+        return asyncio.get_running_loop().run_in_executor(
+            None, self.add_message, message
+        )
 
 
 #

@@ -165,36 +165,84 @@ RedisChatMessageHistory with session_id
 """
 chat_model_example with tools(tavily)
 """
-from apps.entities.tools.tavily.tavily_search import tavily_tools
-from langchain.agents import initialize_agent, AgentType
-from langgraph.prebuilt import create_react_agent
-
-chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
-
-chat_model_with_tool.bind_tools(tavily_tools)
-
-# response = chat_model_with_tool.invoke([HumanMessage(content="서울 날씨 알려줘")])
+# from apps.entities.tools.tavily.tavily_search import tavily_tools
+# from langchain.agents import initialize_agent, AgentType
+# from langchain_core.prompts.prompt import PromptTemplate
+# from langgraph.prebuilt import create_react_agent
+# from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+# from datetime import datetime
 #
-# print(f"Content : {response.content}")
-# print(f"ToolCalls : {response.tool_calls}")
-
-# tavily_agent = create_react_agent(
-#     model=chat_model_with_tool,
+# prompt = PromptTemplate(
+#     template="""
+# You are a helpful Chat Assistant
+# Here is current several useful information
+# You have to use below information!
+#
+# Example
+#
+# Question : 2024년 10월 21일 9시, user : 123, input : 안녕 오늘 날씨 어때
+# Answer : 안녕하세요 2024년 10월 21일 9시 현재날씨는 맑음, 강수확률 50%, 온도 -2도 입니다. 안전운행 하세요
+#
+#
+# current_time : {current_time}
+# user : {user}
+#
+# Your turn!
+# """,
+#     input_variables=["current_time", "user"],
+# )
+#
+#
+# chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
+#
+#
+# from pydantic import BaseModel, Field
+#
+#
+# class ResponseFormatter(BaseModel):
+#     """Always use this tool to structure your response to the user."""
+#
+#     answer: str = Field(description="The answer to the user's question")
+#     followup_question: str = Field(description="A followup question the user could ask")
+#
+#
+# chat_model_with_tool.bind_tools(tavily_tools)
+# # chat_model_with_tool.bind_tools([ResponseFormatter])
+#
+# # response = chat_model_with_tool.invoke([HumanMessage(content="서울 날씨 알려줘")])
+# #
+# # print(f"Content : {response.content}")
+# # print(f"ToolCalls : {response.tool_calls}")
+#
+# # tavily_agent = create_react_agent(
+# #     model=chat_model_with_tool,
+# #     tools=tavily_tools,
+# # )
+#
+# tavily_agent = initialize_agent(
+#     llm=chat_model_with_tool,
 #     tools=tavily_tools,
+#     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+#     prompt=prompt,
+#     verbose=True,
+#     max_iterations=1,
 # )
-
-tavily_agent = initialize_agent(
-    llm=chat_model_with_tool,
-    tools=tavily_tools,
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True,
-)
-response = tavily_agent.invoke(
-    "현재 서울날씨 알려줘, 현재날짜(연,월,일,시간),현재날씨,온도,바람 정보만 알려줘",
-    max_iterations=1,
-)
-# response = tavily_agent.invoke(
-#     {"messages": [HumanMessage(content="whats the weather in seoul?")]}
+#
+#
+# # prmopt = PromptTemplate(
+# #     template = """
+# #     """
+# # )
+# query = "현재 서울 천호동 날씨 알려줘"
+# _time = datetime.now()
+# _now_date = f"{_time.year}년{_time.month}월{_time.day}일 {_time.hour}시{_time.minute}분"
+# response = (tavily_agent).invoke(
+#     {
+#         # "current_time": f"{_time.month}월, {_time.day}일 {_time.hour}시 {_time.minute}분",
+#         # "user": "user123",
+#         "input": f"current_time : {_now_date}, user_query : {query} 받은 정보의 연,월,일,시,분을 알려주고, 날씨,온도,강수확률,바람 정보를 알려줘 ",
+#     }
 # )
-
-print(response)
+#
+#
+# print(response)
