@@ -44,13 +44,4 @@ load_dotenv()
 #         Union[typing.Dict[str, Any], type, Callable, BaseTool]  # noqa: UP006
 #     ], **kwargs: Any) -> Runnable[LanguageModelInput, BaseMessage]:
 #         pass
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-
-base_chat = ChatOpenAI(model="gpt-4o", temperature=0.5, verbose=True)
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", "You're an assistant who's good at {ability}"),
-        MessagesPlaceholder(variable_name="history"),
-        ("human", "{question}"),
-    ]
-)
+base_chat = ChatOpenAI(model="gpt-4o", temperature=0)
