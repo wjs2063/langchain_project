@@ -5,6 +5,7 @@ from langchain.memory import (
     ConversationBufferWindowMemory,
     ConversationSummaryBufferMemory,
 )
+from langchain.callbacks.tracers import ConsoleCallbackHandler
 from langchain.schema import HumanMessage, AIMessage
 from apps.entities.memories.history import (
     SlidingWindowBufferRedisChatMessageHistory,
@@ -62,6 +63,7 @@ async def main():
     chain = chainlit_prompt | base_chat
     chain_with_history = RunnableWithMessageHistory(
         chain,
+        verbose=True,
         get_session_history=get_history,
         history_messages_key="history",  # history 의 key값
         input_messages_key="question",  # input_message의 key값
@@ -83,12 +85,21 @@ async def main():
     cl.user_session.set("chain", chain_with_history)
 
 
+from datetime import datetime
+
+
 @cl.on_message
 async def on_message(message: Message):
     chain = cl.user_session.get("chain")
+    _now = datetime.now()
+    user_info = f"""
+    현재 날짜 : {_now.year}년 {_now.month}월 {_now.day}일 {_now.hour}시 {_now.minute}분 
+    """
     result = await chain.ainvoke(
-        {"question": message.content, "ability": "chatting"},
-        config={"configurable": {"session_id": "jaehyeon", "user_id": "jaehyeon"}},
+        {"question": message.content, "ability": "chatting", "user_info": user_info},
+        config={
+            "configurable": {"session_id": "jaehyeon", "user_id": "jaehyeon"},
+            "callbacks": [ConsoleCallbackHandler()],
+        },
     )
-    print(result)
     await cl.Message(content=result.content).send()
