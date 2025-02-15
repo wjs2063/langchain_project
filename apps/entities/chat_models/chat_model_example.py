@@ -189,12 +189,12 @@ tavily_agent = initialize_agent(
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
 )
-response = tavily_agent.invoke(
-    "현재 서울날씨 알려줘, 현재날짜(연,월,일,시간),현재날씨,온도,바람 정보만 알려줘",
-    max_iterations=1,
-)
 # response = tavily_agent.invoke(
-#     {"messages": [HumanMessage(content="whats the weather in seoul?")]}
+#     "현재 서울날씨 알려줘, 현재날짜(연,월,일,시간),현재날씨,온도,바람 정보만 알려줘",
+#     max_iterations=1,
 # )
-
-print(response)
+# # response = tavily_agent.invoke(
+# #     {"messages": [HumanMessage(content="whats the weather in seoul?")]}
+# # )
+#
+# print(response)

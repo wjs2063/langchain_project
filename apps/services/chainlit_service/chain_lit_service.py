@@ -13,9 +13,12 @@ from langchain_core.runnables import RunnableWithMessageHistory
 from apps.entities.auth.model import User, User_Pydantic
 from apps.entities.auth.crypt_passwd import pwd_context
 from apps.entities.auth.schema import UserSchema
-from apps.entities.chat_models.chat_models import base_chat, prompt
+from apps.entities.chat_models.chat_models import base_chat
 from langchain_core.messages import trim_messages
+from apps.services.chainlit_service.prompt import chainlit_prompt
 from langchain_core.runnables import ConfigurableFieldSpec
+from chainlit.message import Message
+from langchain.schema import HumanMessage, AIMessage
 
 
 def get_history(session_id: str):
@@ -56,7 +59,7 @@ async def main():
         session_id=user_session_id, url=_redis_url, buffer_size=8
     )
 
-    chain = prompt | base_chat
+    chain = chainlit_prompt | base_chat
     chain_with_history = RunnableWithMessageHistory(
         chain,
         get_session_history=get_history,
@@ -71,15 +74,13 @@ async def main():
         max_tokens=100,
         token_counter=len,
     )
+
     for message in buffered_history:
         if isinstance(message, HumanMessage):
             await cl.Message(author="User", content=f"{message.content}").send()
         else:
             await cl.Message(author="VPA", content=f"{message.content}").send()
     cl.user_session.set("chain", chain_with_history)
-
-
-from chainlit.message import Message
 
 
 @cl.on_message
