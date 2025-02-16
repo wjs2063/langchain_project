@@ -15,6 +15,7 @@ from apps.services.chainlit_service.prompt import chainlit_prompt
 from chainlit.message import Message
 from langchain.schema import HumanMessage, AIMessage
 from datetime import datetime
+from apps.entities.chat_models.chat_model_example import agent_with_tools
 
 
 def get_history(session_id: str):
@@ -62,7 +63,7 @@ async def main():
         session_id=user_session_id, url=_redis_url, buffer_size=8
     )
 
-    chain = chainlit_prompt | base_chat
+    chain = chainlit_prompt | agent_with_tools
     chain_with_history = RunnableWithMessageHistory(
         chain,
         verbose=True,
@@ -102,4 +103,4 @@ async def on_message(message: Message):
             "callbacks": [ConsoleCallbackHandler()],
         },
     )
-    await cl.Message(content=result.content).send()
+    await cl.Message(content=result["output"]).send()
