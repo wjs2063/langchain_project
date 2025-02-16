@@ -174,14 +174,14 @@ chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
 
 tools = [tavily_search_tool, get_current_date]
 
-tavily_agent = initialize_agent(
+agent_with_tools = initialize_agent(
     llm=chat_model_with_tool,
     tools=tools,
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     max_iterations=3,
-    output_parser=JsonOutputParser(),
+    handle_parsing_errors=True,
 )
 
-response = tavily_agent.invoke(input="천호동 날씨 알려주라")
-print(response)
+# response = tavily_agent.invoke(input="천호동 날씨 알려주라")
+# print(response)
