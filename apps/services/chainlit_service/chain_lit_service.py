@@ -1,11 +1,7 @@
 import chainlit as cl
 from apps.infras.redis._redis import _redis_url
-from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain.memory import (
-    ConversationBufferWindowMemory,
-    ConversationSummaryBufferMemory,
-)
-from langchain.schema import HumanMessage, AIMessage
+
+from langchain.callbacks.tracers import ConsoleCallbackHandler
 from apps.entities.memories.history import (
     SlidingWindowBufferRedisChatMessageHistory,
 )
@@ -13,9 +9,13 @@ from langchain_core.runnables import RunnableWithMessageHistory
 from apps.entities.auth.model import User, User_Pydantic
 from apps.entities.auth.crypt_passwd import pwd_context
 from apps.entities.auth.schema import UserSchema
-from apps.entities.chat_models.chat_models import base_chat, prompt
+from apps.entities.chat_models.chat_models import base_chat
 from langchain_core.messages import trim_messages
-from langchain_core.runnables import ConfigurableFieldSpec
+from apps.services.chainlit_service.prompt import chainlit_prompt
+from chainlit.message import Message
+from langchain.schema import HumanMessage, AIMessage
+from datetime import datetime
+from apps.entities.chat_models.chat_model_example import agent_with_tools
 
 
 def get_history(session_id: str):
@@ -31,6 +31,13 @@ async def get_user(user_id: str, password: str):
     if not pwd_context.verify(password, res.password):
         raise ValueError("id와 password 를 확인해주세요")
     return UserSchema(**(await User_Pydantic.from_tortoise_orm(res)).dict())
+
+
+def get_current_time(*args, **kwargs) -> str:
+    _now = datetime.now()
+    return f"""
+    현재 날짜 : {_now.year}년 {_now.month}월 {_now.day}일 {_now.hour}시 {_now.minute}분 
+    """
 
 
 @cl.password_auth_callback
@@ -56,9 +63,10 @@ async def main():
         session_id=user_session_id, url=_redis_url, buffer_size=8
     )
 
-    chain = prompt | base_chat
+    chain = chainlit_prompt | agent_with_tools
     chain_with_history = RunnableWithMessageHistory(
         chain,
+        verbose=True,
         get_session_history=get_history,
         history_messages_key="history",  # history 의 key값
         input_messages_key="question",  # input_message의 key값
@@ -71,23 +79,28 @@ async def main():
         max_tokens=100,
         token_counter=len,
     )
+    await cl.Message("-" * 10 + "대화 이력" + "-" * 10).send()
     for message in buffered_history:
         if isinstance(message, HumanMessage):
-            await cl.Message(author="User", content=f"{message.content}").send()
+            await cl.Message(author="User", content=f"User : {message.content}").send()
         else:
-            await cl.Message(author="VPA", content=f"{message.content}").send()
+            await cl.Message(author="VPA", content=f"VPA : {message.content}").send()
+    await cl.Message("-" * 20).send()
     cl.user_session.set("chain", chain_with_history)
-
-
-from chainlit.message import Message
 
 
 @cl.on_message
 async def on_message(message: Message):
     chain = cl.user_session.get("chain")
+    _now = datetime.now()
+    user_info = f"""
+    현재 날짜 : {_now.year}년 {_now.month}월 {_now.day}일 {_now.hour}시 {_now.minute}분 
+    """
     result = await chain.ainvoke(
-        {"question": message.content, "ability": "chatting"},
-        config={"configurable": {"session_id": "jaehyeon", "user_id": "jaehyeon"}},
+        {"question": message.content, "ability": "chatting", "user_info": user_info},
+        config={
+            "configurable": {"session_id": "jaehyeon", "user_id": "jaehyeon"},
+            "callbacks": [ConsoleCallbackHandler()],
+        },
     )
-    print(result)
-    await cl.Message(content=result.content).send()
+    await cl.Message(content=result["output"]).send()
