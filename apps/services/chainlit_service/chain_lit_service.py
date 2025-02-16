@@ -1,12 +1,7 @@
 import chainlit as cl
 from apps.infras.redis._redis import _redis_url
-from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain.memory import (
-    ConversationBufferWindowMemory,
-    ConversationSummaryBufferMemory,
-)
+
 from langchain.callbacks.tracers import ConsoleCallbackHandler
-from langchain.schema import HumanMessage, AIMessage
 from apps.entities.memories.history import (
     SlidingWindowBufferRedisChatMessageHistory,
 )
@@ -17,9 +12,9 @@ from apps.entities.auth.schema import UserSchema
 from apps.entities.chat_models.chat_models import base_chat
 from langchain_core.messages import trim_messages
 from apps.services.chainlit_service.prompt import chainlit_prompt
-from langchain_core.runnables import ConfigurableFieldSpec
 from chainlit.message import Message
 from langchain.schema import HumanMessage, AIMessage
+from datetime import datetime
 
 
 def get_history(session_id: str):
@@ -35,6 +30,13 @@ async def get_user(user_id: str, password: str):
     if not pwd_context.verify(password, res.password):
         raise ValueError("id와 password 를 확인해주세요")
     return UserSchema(**(await User_Pydantic.from_tortoise_orm(res)).dict())
+
+
+def get_current_time(*args, **kwargs) -> str:
+    _now = datetime.now()
+    return f"""
+    현재 날짜 : {_now.year}년 {_now.month}월 {_now.day}일 {_now.hour}시 {_now.minute}분 
+    """
 
 
 @cl.password_auth_callback
@@ -76,16 +78,14 @@ async def main():
         max_tokens=100,
         token_counter=len,
     )
-
+    await cl.Message("-" * 10 + "대화 이력" + "-" * 10).send()
     for message in buffered_history:
         if isinstance(message, HumanMessage):
-            await cl.Message(author="User", content=f"{message.content}").send()
+            await cl.Message(author="User", content=f"User : {message.content}").send()
         else:
-            await cl.Message(author="VPA", content=f"{message.content}").send()
+            await cl.Message(author="VPA", content=f"VPA : {message.content}").send()
+    await cl.Message("-" * 20).send()
     cl.user_session.set("chain", chain_with_history)
-
-
-from datetime import datetime
 
 
 @cl.on_message
