@@ -165,36 +165,23 @@ RedisChatMessageHistory with session_id
 """
 chat_model_example with tools(tavily)
 """
-from apps.entities.tools.tavily.tavily_search import tavily_tools
+from apps.entities.tools.tavily.tavily_search import tavily_search_tool
 from langchain.agents import initialize_agent, AgentType
-from langgraph.prebuilt import create_react_agent
+from apps.entities.tools.utils.etc import get_current_date
+from langchain_core.output_parsers import JsonOutputParser
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
 
-chat_model_with_tool.bind_tools(tavily_tools)
+tools = [tavily_search_tool, get_current_date]
 
-# response = chat_model_with_tool.invoke([HumanMessage(content="서울 날씨 알려줘")])
-#
-# print(f"Content : {response.content}")
-# print(f"ToolCalls : {response.tool_calls}")
-
-# tavily_agent = create_react_agent(
-#     model=chat_model_with_tool,
-#     tools=tavily_tools,
-# )
-
-tavily_agent = initialize_agent(
+agent_with_tools = initialize_agent(
     llm=chat_model_with_tool,
-    tools=tavily_tools,
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+    tools=tools,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
+    max_iterations=3,
+    handle_parsing_errors=True,
 )
-response = tavily_agent.invoke(
-    "현재 서울날씨 알려줘, 현재날짜(연,월,일,시간),현재날씨,온도,바람 정보만 알려줘",
-    max_iterations=1,
-)
-# response = tavily_agent.invoke(
-#     {"messages": [HumanMessage(content="whats the weather in seoul?")]}
-# )
 
-print(response)
+# response = tavily_agent.invoke(input="천호동 날씨 알려주라")
+# print(response)
