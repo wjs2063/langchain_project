@@ -171,10 +171,11 @@ from langchain.agents import initialize_agent, AgentType
 from apps.entities.tools.utils.etc import current_date_tool
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
 from langchain_core.output_parsers import JsonOutputParser
+from apps.entities.tools.weathers.weather_tool import get_weather
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
 
-tools = [tavily_search_tool, current_date_tool, wiki_tool]
+tools = [tavily_search_tool, current_date_tool, wiki_tool, get_weather]
 
 agent_with_tools = initialize_agent(
     llm=chat_model_with_tool,
@@ -185,5 +186,5 @@ agent_with_tools = initialize_agent(
     handle_parsing_errors=True,
 )
 
-# response = tavily_agent.invoke(input="천호동 날씨 알려주라")
-# print(response)
+response = agent_with_tools.invoke(input="서울 날씨 알려줘")
+print(response)
