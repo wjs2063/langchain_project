@@ -8,7 +8,7 @@ from langchain_community.utilities import WikipediaAPIWrapper
 from pydantic import BaseModel, Field
 
 api_wrapper = WikipediaAPIWrapper(
-    wiki_client="wiki", top_k_results=2, doc_content_chars_max=50
+    wiki_client="wiki", top_k_results=2, doc_content_chars_max=100
 )
 
 
@@ -23,7 +23,7 @@ class WikiInputs(BaseModel):
     )
 
 
-tool = WikipediaQueryRun(
+wiki_tool = WikipediaQueryRun(
     name="wiki-tool",
     description="look up things in wikipedia",
     args_schema=WikiInputs,

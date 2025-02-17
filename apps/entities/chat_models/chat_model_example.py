@@ -4,6 +4,8 @@ from langchain_core.runnables import ConfigurableField
 from langchain.chat_models import init_chat_model
 from langchain.schema import HumanMessage, AIMessage
 import os
+import time
+from apps.entities.caches.caches import redis_cache
 from dotenv import load_dotenv
 
 warnings.filterwarnings("ignore")
@@ -11,8 +13,7 @@ warnings.filterwarnings("ignore")
 load_dotenv()
 llm = ChatOpenAI(model="gpt-4o", temperature=0.5)
 # Function to measure execution time
-import time
-from apps.entities.caches.caches import redis_cache
+
 
 """
 caching example
@@ -167,12 +168,13 @@ chat_model_example with tools(tavily)
 """
 from apps.entities.tools.tavily.tavily_search import tavily_search_tool
 from langchain.agents import initialize_agent, AgentType
-from apps.entities.tools.utils.etc import get_current_date
+from apps.entities.tools.utils.etc import current_date_tool
+from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
 from langchain_core.output_parsers import JsonOutputParser
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
 
-tools = [tavily_search_tool, get_current_date]
+tools = [tavily_search_tool, current_date_tool, wiki_tool]
 
 agent_with_tools = initialize_agent(
     llm=chat_model_with_tool,
