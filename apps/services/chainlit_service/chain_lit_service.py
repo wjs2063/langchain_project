@@ -16,6 +16,7 @@ from chainlit.message import Message
 from langchain.schema import HumanMessage, AIMessage
 from datetime import datetime
 from apps.entities.chat_models.chat_model_example import agent_with_tools
+from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
 
 
 def get_history(session_id: str):
