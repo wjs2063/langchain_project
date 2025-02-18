@@ -38,6 +38,7 @@ langgraph = "^0.2.71"
 celery = {extras = ["redis"], version = "^5.4.0"}
 psycopg = "^3.2.4"
 psycopg2-binary = "^2.9.10"
+geopy = "^2.4.1"
 
 
 [tool.poetry.group.dev.dependencies]

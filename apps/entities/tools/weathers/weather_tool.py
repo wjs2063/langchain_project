@@ -2,6 +2,7 @@ import os
 import requests
 from langchain_core.tools import tool
 from dotenv import load_dotenv
+from apps.entities.tools.geo.geo_info import locator
 
 load_dotenv()
 
@@ -20,13 +21,17 @@ def get_weather(location: str) -> str:
     # 입력 전처리
     location = location.strip("'\"")
 
-    # API 요청 파라미터 설정
-    params = {
-        "lat": "37.63695556",
-        "lon": "127.0277194",
-        "appid": api_key,
-        "units": "metric",
-    }
+    try:
+        response = locator.geocode(location)
+        # API 요청 파라미터 설정
+        params = {
+            "lat": response.raw["lat"],
+            "lon": response.raw["lon"],
+            "appid": api_key,
+            "units": "metric",
+        }
+    except Exception as e:
+        return f"위치 정보를 받아올수없습니다. 오류 : {str(e)}"
 
     try:
         # API 요청 및 응답 처리
