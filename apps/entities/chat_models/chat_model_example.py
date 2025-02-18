@@ -188,3 +188,26 @@ agent_with_tools = initialize_agent(
 
 # response = agent_with_tools.invoke(input="서울 날씨 알려줘")
 # print(response)
+
+"""
+Runnable Parallel Example
+"""
+
+from langchain_core.runnables import RunnableParallel
+from langchain_core.prompts import ChatPromptTemplate
+
+_parallel_chat_model_example = ChatOpenAI(model="gpt-4o", temperature=0.5)
+
+joke_chain = (
+    ChatPromptTemplate.from_template("tell me a joke about {topic}")
+    | _parallel_chat_model_example
+)
+
+write_chain = (
+    ChatPromptTemplate.from_template("write a 2-line poem about {topic}")
+    | _parallel_chat_model_example
+)
+
+runnable = RunnableParallel(joke=joke_chain, write=write_chain)
+
+print(runnable.invoke({"topic": "snow"}))
