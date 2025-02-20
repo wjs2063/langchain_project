@@ -7,7 +7,7 @@ locator = Nominatim(user_agent="geo_info")
 
 
 @tool
-def fetch_coordination(location) -> dict[str, str]:
+def fetch_coordination_tool(location) -> dict[str, str]:
     """
     특정지역의 위도,경도를 반환합니다
     """
@@ -15,4 +15,4 @@ def fetch_coordination(location) -> dict[str, str]:
     return {"lat": response["latitude"], "lon": response["longitude"]}
 
 
-print(locator.geocode("서울 천호동").raw)
+# print(locator.geocode("서울 천호동").raw)
