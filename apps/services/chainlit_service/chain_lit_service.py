@@ -19,7 +19,7 @@ from apps.entities.chat_models.chat_model_example import agent_with_tools
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
 
 
-def get_history(session_id: str):
+def get_history(session_id: str) -> SlidingWindowBufferRedisChatMessageHistory:
     return SlidingWindowBufferRedisChatMessageHistory(
         session_id=session_id, url=_redis_url, buffer_size=8
     )
@@ -39,6 +39,30 @@ def get_current_time(*args, **kwargs) -> str:
     return f"""
     현재 날짜 : {_now.year}년 {_now.month}월 {_now.day}일 {_now.hour}시 {_now.minute}분 
     """
+
+
+async def display_chat_history(history):
+    """
+    대화 이력을 화면에 출력하는 함수
+    """
+    messages = trim_messages(
+        messages=await history.aget_messages(),
+        strategy="last",
+        start_on="human",
+        allow_partial=False,
+        max_tokens=100,
+        token_counter=len,
+    )
+    history_msgs = ["-" * 10 + "대화 이력" + "-" * 10]
+
+    for msg in messages:
+        author = "User" if isinstance(msg, HumanMessage) else "AI"
+        history_msgs.append(f"{author} : {msg.content}")
+
+    history_msgs.append("-" * 20)
+
+    for msg in history_msgs:
+        await cl.Message(msg).send()
 
 
 @cl.password_auth_callback
@@ -64,29 +88,15 @@ async def main():
         session_id=user_session_id, url=_redis_url, buffer_size=8
     )
 
-    chain = chainlit_prompt | agent_with_tools
     chain_with_history = RunnableWithMessageHistory(
-        chain,
+        chainlit_prompt | agent_with_tools,
         verbose=True,
         get_session_history=get_history,
-        history_messages_key="history",  # history 의 key값
-        input_messages_key="question",  # input_message의 key값
+        history_messages_key="history",
+        input_messages_key="question",
     )
-    buffered_history = trim_messages(
-        messages=await history.aget_messages(),
-        strategy="last",
-        start_on="human",
-        allow_partial=False,
-        max_tokens=100,
-        token_counter=len,
-    )
-    await cl.Message("-" * 10 + "대화 이력" + "-" * 10).send()
-    for message in buffered_history:
-        if isinstance(message, HumanMessage):
-            await cl.Message(author="User", content=f"User : {message.content}").send()
-        else:
-            await cl.Message(author="VPA", content=f"VPA : {message.content}").send()
-    await cl.Message("-" * 20).send()
+
+    await display_chat_history(history)
     cl.user_session.set("chain", chain_with_history)
 
 

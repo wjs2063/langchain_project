@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from apps.apis.v1.v1_endpoint import chat_router
+from apps.apis.v1.v1_endpoint import v1_router
 from chainlit.utils import mount_chainlit
 from tortoise.contrib.fastapi import register_tortoise, RegisterTortoise
 from contextlib import asynccontextmanager
@@ -54,7 +54,6 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(title="Langchain ChatBot Apps", lifespan=lifespan)
 
-app.include_router(chat_router)
 app.include_router(router)
 
 

@@ -1,11 +1,5 @@
 import warnings
 from langchain_openai import ChatOpenAI
-from langchain_core.runnables import ConfigurableField
-from langchain.chat_models import init_chat_model
-from langchain.schema import HumanMessage, AIMessage
-import os
-import time
-from apps.entities.caches.caches import redis_cache
 from dotenv import load_dotenv
 
 warnings.filterwarnings("ignore")
@@ -166,11 +160,10 @@ RedisChatMessageHistory with session_id
 """
 chat_model_example with tools(tavily)
 """
-from apps.entities.tools.tavily.tavily_search import tavily_search_tool
+from entities.tools.search.tavily.tavily_search import tavily_search_tool
 from langchain.agents import initialize_agent, AgentType
 from apps.entities.tools.utils.etc import current_date_tool
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
-from langchain_core.output_parsers import JsonOutputParser
 from apps.entities.tools.weathers.weather_tool import get_weather
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
@@ -180,7 +173,7 @@ tools = [tavily_search_tool, current_date_tool, wiki_tool, get_weather]
 agent_with_tools = initialize_agent(
     llm=chat_model_with_tool,
     tools=tools,
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     max_iterations=3,
     handle_parsing_errors=True,
@@ -210,4 +203,4 @@ write_chain = (
 
 runnable = RunnableParallel(joke=joke_chain, write=write_chain)
 
-print(runnable.invoke({"topic": "snow"}))
+# print(runnable.invoke({"topic": "snow"}))
