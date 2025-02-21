@@ -1,12 +1,13 @@
-from langchain.text_splitter import SpacyTextSplitter
-import fitz
-from langchain_openai import OpenAIEmbeddings
-from dotenv import load_dotenv
-from langchain_milvus import Milvus
-from pymilvus import MilvusClient, DataType
-from openai import OpenAI
 import os
+
+import fitz
 import tiktoken
+from dotenv import load_dotenv
+from langchain.text_splitter import SpacyTextSplitter
+from langchain_milvus import Milvus
+from langchain_openai import OpenAIEmbeddings
+from openai import OpenAI
+from pymilvus import DataType, MilvusClient
 
 load_dotenv("../.env")
 

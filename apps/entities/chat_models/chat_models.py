@@ -2,10 +2,11 @@
 ChatModel
 """
 
-from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+from langchain.tools import BaseTool, Tool
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.tools import Tool,BaseTool
+from langchain_openai import ChatOpenAI
+
 load_dotenv()
 
 

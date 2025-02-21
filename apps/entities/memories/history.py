@@ -1,8 +1,11 @@
-from apps.entities.caches.caches import _redis_url
-from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict
 import json
 from typing import Optional, Sequence
+
+from langchain_community.chat_message_histories import RedisChatMessageHistory
+from langchain_core.messages import (BaseMessage, message_to_dict,
+                                     messages_from_dict)
+
+from apps.entities.caches.caches import _redis_url
 
 
 class SlidingWindowBufferRedisChatMessageHistory(RedisChatMessageHistory):

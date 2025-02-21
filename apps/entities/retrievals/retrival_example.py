@@ -1,11 +1,13 @@
-from langchain_openai import OpenAIEmbeddings
-from langchain_chroma import Chroma
+import os
+
+from dotenv import load_dotenv
 from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain_chroma import Chroma
 from langchain_community.retrievers import WikipediaRetriever
+from langchain_openai import OpenAIEmbeddings
+
 from apps.entities.chat_models.chat_model_example import HumanMessage
 from apps.entities.retrievals.prompt import prompt
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -47,12 +49,12 @@ retrieval QA 사용하기 with milvus | chroma
 # # 단어나 문장의 의미를 포착하고
 embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
 
+from langchain_core.prompts import PromptTemplate
 # database = Chroma(
 #     persist_directory="../../datas/chroma_db",
 #     embedding_function=embeddings
 # )
 from langchain_milvus import Milvus
-from langchain_core.prompts import PromptTemplate
 
 milvus_uri = "http://172.30.1.21:19530"
 database = Milvus(

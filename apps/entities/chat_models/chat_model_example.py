@@ -1,6 +1,7 @@
 import warnings
-from langchain_openai import ChatOpenAI
+
 from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
 
 warnings.filterwarnings("ignore")
 
@@ -161,10 +162,11 @@ RedisChatMessageHistory with session_id
 chat_model_example with tools(tavily)
 """
 from entities.tools.search.tavily.tavily_search import tavily_search_tool
-from langchain.agents import initialize_agent, AgentType
+from langchain.agents import AgentType, initialize_agent
+
 from apps.entities.tools.utils.etc import current_date_tool
-from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
 from apps.entities.tools.weathers.weather_tool import get_weather
+from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
 
@@ -186,8 +188,8 @@ agent_with_tools = initialize_agent(
 Runnable Parallel Example
 """
 
-from langchain_core.runnables import RunnableParallel
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableParallel
 
 _parallel_chat_model_example = ChatOpenAI(model="gpt-4o", temperature=0.5)
 

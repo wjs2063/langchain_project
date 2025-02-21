@@ -2,8 +2,8 @@
 https://python.langchain.com/v0.1/docs/modules/tools/
 """
 
-from langchain_community.tools import WikipediaQueryRun
 from langchain_community.document_loaders import WikipediaLoader
+from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from pydantic import BaseModel, Field
 

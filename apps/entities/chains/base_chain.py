@@ -1,7 +1,9 @@
+import asyncio
+
 from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
+
 from apps.entities.chat_models.chat_models import base_chat
-import asyncio
 
 # Base LLM Chain Usage
 
@@ -54,7 +56,7 @@ async def main(*args):
     return response
 
 
-asyncio.run(main())
+# asyncio.run(main())
 
 # import time
 #

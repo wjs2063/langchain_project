@@ -1,5 +1,5 @@
-from geopy.geocoders import Nominatim
 from geopy.adapters import AioHTTPAdapter
+from geopy.geocoders import Nominatim
 from langchain_core.tools import Tool, tool
 
 # locator = Nominatim(user_agent="geo_info", adapter_factory=AioHTTPAdapter)

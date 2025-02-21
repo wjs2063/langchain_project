@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
-from jose import jwt
-from fastapi.security import OAuth2PasswordRequestForm
 from dotenv import load_dotenv
-from apps.entities.auth.schema import UserCreate, UserSchema
-from apps.entities.auth.model import User, User_Pydantic
-from apps.entities.auth.crypt_passwd import pwd_context
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from jose import jwt
+
 from apps.entities.auth.crud import create_user
+from apps.entities.auth.crypt_passwd import pwd_context
+from apps.entities.auth.model import User, User_Pydantic
+from apps.entities.auth.schema import UserCreate, UserSchema
 
 load_dotenv()
 

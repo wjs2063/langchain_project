@@ -4,8 +4,9 @@ Run celery worker
 poetry run celery --app=apps.celerys.celery_app.app worker --concurrency=1 --loglevel=DEBUG
 """
 
-from celery.app import Celery
 import os
+
+from celery.app import Celery
 
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6378")
 postgres_url = "db+postgresql://postgres:postgres@localhost:8080/postgres"
