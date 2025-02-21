@@ -1,22 +1,22 @@
-import chainlit as cl
-from apps.infras.redis._redis import _redis_url
-
-from langchain.callbacks.tracers import ConsoleCallbackHandler
-from apps.entities.memories.history import (
-    SlidingWindowBufferRedisChatMessageHistory,
-)
-from langchain_core.runnables import RunnableWithMessageHistory
-from apps.entities.auth.model import User, User_Pydantic
-from apps.entities.auth.crypt_passwd import pwd_context
-from apps.entities.auth.schema import UserSchema
-from apps.entities.chat_models.chat_models import base_chat
-from langchain_core.messages import trim_messages
-from apps.services.chainlit_service.prompt import chainlit_prompt
-from chainlit.message import Message
-from langchain.schema import HumanMessage, AIMessage
 from datetime import datetime
+
+import chainlit as cl
+from chainlit.message import Message
+from langchain.callbacks.tracers import ConsoleCallbackHandler
+from langchain.schema import AIMessage, HumanMessage
+from langchain_core.messages import trim_messages
+from langchain_core.runnables import RunnableWithMessageHistory
+
+from apps.entities.auth.crypt_passwd import pwd_context
+from apps.entities.auth.model import User, User_Pydantic
+from apps.entities.auth.schema import UserSchema
 from apps.entities.chat_models.chat_model_example import agent_with_tools
+from apps.entities.chat_models.chat_models import base_chat
+from apps.entities.memories.history import \
+    SlidingWindowBufferRedisChatMessageHistory
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
+from apps.infras.redis._redis import _redis_url
+from apps.services.chainlit_service.prompt import chainlit_prompt
 
 
 def get_history(session_id: str) -> SlidingWindowBufferRedisChatMessageHistory:

@@ -1,11 +1,11 @@
+import os
+from functools import partial
 from typing import AsyncGenerator
 
-from tortoise import Tortoise, run_async
-import os
-from pydantic_settings import BaseSettings
-from functools import partial
 import redis.asyncio as redis
+from pydantic_settings import BaseSettings
 from redis.cluster import RedisCluster as Cluster
+from tortoise import Tortoise, run_async
 from tortoise.contrib.fastapi import RegisterTortoise
 
 DB_CONFIG = {

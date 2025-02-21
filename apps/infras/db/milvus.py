@@ -1,5 +1,4 @@
-from pymilvus import MilvusClient, DataType
-
+from pymilvus import DataType, MilvusClient
 
 client = MilvusClient(
     uri="http://127.0.0.1:19530",

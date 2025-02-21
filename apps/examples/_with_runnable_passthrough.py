@@ -1,14 +1,13 @@
-from langchain_core.runnables import (
-    RunnablePassthrough,
-    RunnableLambda,
-    RunnableWithFallbacks,
-    RunnableParallel,
-)
-from apps.entities.tools.geo.geo_info import fetch_coordination_tool
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
 import os
+
 from dotenv import load_dotenv
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import (RunnableLambda, RunnableParallel,
+                                      RunnablePassthrough,
+                                      RunnableWithFallbacks)
+from langchain_openai import ChatOpenAI
+
+from apps.entities.tools.geo.geo_info import fetch_coordination_tool
 
 load_dotenv()
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, Response
+from fastapi import APIRouter, Depends, Request, Response
 
 chat_router = APIRouter()
 

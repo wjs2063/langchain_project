@@ -1,5 +1,5 @@
+from langchain.schema import AIMessage, HumanMessage
 from langchain_core.prompts.prompt import PromptTemplate
-from langchain.schema import HumanMessage, AIMessage
 
 chainlit_prompt = PromptTemplate(
     template="""
