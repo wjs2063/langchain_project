@@ -12,8 +12,7 @@ from apps.entities.auth.model import User, User_Pydantic
 from apps.entities.auth.schema import UserSchema
 from apps.entities.chat_models.chat_model_example import agent_with_tools
 from apps.entities.chat_models.chat_models import base_chat
-from apps.entities.memories.history import \
-    SlidingWindowBufferRedisChatMessageHistory
+from apps.entities.memories.history import SlidingWindowBufferRedisChatMessageHistory
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
 from apps.infras.redis._redis import _redis_url
 from apps.services.chainlit_service.prompt import chainlit_prompt
@@ -53,6 +52,9 @@ async def display_chat_history(history):
         max_tokens=100,
         token_counter=len,
     )
+
+    if not messages:
+        return
     history_msgs = ["-" * 10 + "대화 이력" + "-" * 10]
 
     for msg in messages:
@@ -63,26 +65,29 @@ async def display_chat_history(history):
 
     for msg in history_msgs:
         await cl.Message(msg).send()
+    await cl.Message("-" * 10 + "대화 이력" + "-" * 10).send()
+    print("대화 보냄")
 
 
 @cl.password_auth_callback
 async def auth_callback(user_id: str, password: str):
     res = await get_user(user_id, password)
-    cl.user_session.set(res.user_id, res.user_name)
+    # cl.user_session.set(res.user_id, res.user_name)
     return cl.User(
-        identifier="admin", metadata={"role": "admin", "provider": "credentials"}
+        identifier=res.user_id,
+        metadata={"role": res.user_id, "provider": "credentials"},
     )
 
 
 @cl.on_chat_start
 async def main():
-    user_session_id = "jaehyeon"
+    user_res = await cl.AskUserMessage("가져올 세션id를 입력해주세요").send()
+    print(user_res)
+    user_session_id = user_res["output"]
+
     if not user_session_id:
         await cl.Message(content="로그인 정보가 없습니다. 다시 로그인해주세요.").send()
         return
-    await cl.Message(
-        content=f"안녕하세요! {user_session_id}님! 무엇을 도와드릴까요?!",
-    ).send()
 
     history = SlidingWindowBufferRedisChatMessageHistory(
         session_id=user_session_id, url=_redis_url, buffer_size=8
@@ -92,11 +97,15 @@ async def main():
         chainlit_prompt | agent_with_tools,
         verbose=True,
         get_session_history=get_history,
-        history_messages_key="history",
+        history_messages_key="chat_history",
         input_messages_key="question",
     )
 
     await display_chat_history(history)
+
+    await cl.Message(
+        content=f"안녕하세요! {user_session_id}님! 무엇을 도와드릴까요?!",
+    ).send()
     cl.user_session.set("chain", chain_with_history)
 
 

@@ -167,19 +167,43 @@ from langchain.agents import AgentType, initialize_agent
 from apps.entities.tools.utils.etc import current_date_tool
 from apps.entities.tools.weathers.weather_tool import get_weather
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
+from langchain_core.prompts.prompt import PromptTemplate
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
 
 tools = [tavily_search_tool, current_date_tool, wiki_tool, get_weather]
-
+prompt = PromptTemplate(
+    template="""
+    넌 유능한 비서야. 사용자의 질문에 대답해
+    규칙 :
+    1. 맥락에 맞게 대답할것
+    2. tool 을 사용할것
+    
+    user question : {question}
+    """,
+    input_variables=["question"],
+)
 agent_with_tools = initialize_agent(
     llm=chat_model_with_tool,
     tools=tools,
-    agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+    agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
     verbose=True,
-    max_iterations=3,
+    max_iterations=2,
     handle_parsing_errors=True,
+    kwargs={"input_keys": ["question", "context"]},
 )
+
+# chain_with_history = RunnableWithMessageHistory(
+#     chainlit_prompt | agent_with_tools,
+#     verbose=True,
+#     get_session_history=get_history,
+#     history_messages_key="chat_history",
+#     input_messages_key="question",
+# )
+
+# input_key 일치 시켜야함
+# agent_with_tools.input_keys = ["chat_history", "question"]
+print(agent_with_tools.input_keys)
 
 # response = agent_with_tools.invoke(input="서울 날씨 알려줘")
 # print(response)
