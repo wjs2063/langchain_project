@@ -28,3 +28,12 @@ app.conf.update(
 def celery_add(x: int, y: int) -> int:
     z = x**2 + y**2
     return {"result": z}
+
+
+from apps.utils.smtp.send_email import send_email
+from typing import List
+
+
+@app.task
+def celery_send_email(to_email: List[str], subject: str, body: str):
+    send_email(to_email=["wjs2063@naver.com"], subject="hi", body="hello")

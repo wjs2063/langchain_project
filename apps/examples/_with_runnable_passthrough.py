@@ -2,9 +2,12 @@ import os
 
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables import (RunnableLambda, RunnableParallel,
-                                      RunnablePassthrough,
-                                      RunnableWithFallbacks)
+from langchain_core.runnables import (
+    RunnableLambda,
+    RunnableParallel,
+    RunnablePassthrough,
+    RunnableWithFallbacks,
+)
 from langchain_openai import ChatOpenAI
 
 from apps.entities.tools.geo.geo_info import fetch_coordination_tool
@@ -38,4 +41,4 @@ agent = (
     | llm.bind_tools([fetch_coordination_tool])
 )
 
-print(agent.invoke({"input": "5"}))
+# print(agent.invoke({"input": "5"}))
