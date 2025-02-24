@@ -10,11 +10,11 @@ naver_id, naver_password = os.getenv("NAVER_ID"), os.getenv("NAVER_PASSWORD")
 conf = ConnectionConfig(
     MAIL_USERNAME=naver_id,
     MAIL_PASSWORD=naver_password,
-    MAIL_SERVER="smtp.naver.com",
+    MAIL_SERVER=os.getenv("SMTP_SERVER"),
     MAIL_STARTTLS=True,
     MAIL_PORT=587,
-    MAIL_FROM_NAME="jaehyeon",
-    MAIL_FROM="jahy5352@naver.com",
+    MAIL_FROM_NAME="test_user",
+    MAIL_FROM=os.getenv("SMTP_MAIL_FROM"),
     MAIL_SSL_TLS=False,
 )
 
@@ -32,4 +32,4 @@ async def send_email(to_email: List[str], subject: str, body: str):
     return {"status": "ok", "msg": "mail sent"}
 
 
-asyncio.run(send_email())
+asyncio.run(send_email(to_email=["test_user_email"], subject="test", body="test"))
