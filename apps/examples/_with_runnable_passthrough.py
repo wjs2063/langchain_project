@@ -19,7 +19,7 @@ llm = ChatOpenAI(model="gpt-4o", temperature=0.5, verbose=True)
 example_runnable = RunnablePassthrough() | RunnableParallel(
     result=lambda x: llm.invoke("how are you")
 )
-print(example_runnable.invoke({"msg": "hello"}))
+# print(example_runnable.invoke({"msg": "hello"}))
 
 prompt = ChatPromptTemplate.from_messages(
     [
@@ -87,3 +87,33 @@ def get_dictionary(input_dict: dict):
 
 
 # print(runnable.invoke({"question": "hello", "msg": "hi"}))
+
+
+runnable = {"topic": RunnablePassthrough()} | RunnablePassthrough()
+
+# print(
+#     runnable.invoke({"input": "hello"})
+# )  # invoke 로 들어오는 인자가 runnable 의 RunnablePassthrough()로 들어감
+
+runnable = RunnablePassthrough() | RunnablePassthrough()
+
+# print(runnable.invoke("hello"))
+from langchain_core.output_parsers import StrOutputParser
+
+chain1 = prompt | llm | StrOutputParser()
+chain2 = prompt | llm | StrOutputParser()
+
+
+def _print(info):
+    print("info : ", info)
+    return info
+
+
+runnable = (
+    RunnablePassthrough()
+    | {"question": chain1}
+    | {"output": chain2}
+    | RunnableLambda(_print)
+)
+
+print(runnable.invoke({"question": "what's the weather today"}))
