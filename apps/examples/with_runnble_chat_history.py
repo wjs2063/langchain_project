@@ -1,14 +1,16 @@
-from langchain_core.runnables import RunnableWithMessageHistory
 from entities.tools.search.tavily.tavily_search import tavily_search_tool
 from langchain.agents import AgentType, initialize_agent
-from apps.services.chainlit_service.prompt import chainlit_prompt
+from langchain_core.prompts.prompt import PromptTemplate
+from langchain_core.runnables import RunnableWithMessageHistory
+from langchain_openai import ChatOpenAI
+
+from apps.entities.memories.history import \
+    SlidingWindowBufferRedisChatMessageHistory
 from apps.entities.tools.utils.etc import current_date_tool
 from apps.entities.tools.weathers.weather_tool import get_weather
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
-from langchain_core.prompts.prompt import PromptTemplate
-from langchain_openai import ChatOpenAI
 from apps.infras.redis._redis import _redis_url
-from apps.entities.memories.history import SlidingWindowBufferRedisChatMessageHistory
+from apps.services.chainlit_service.prompt import chainlit_prompt
 
 chat_model = ChatOpenAI(model="gpt-4o", temperature=0.5)
 

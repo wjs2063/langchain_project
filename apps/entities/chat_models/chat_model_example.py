@@ -163,11 +163,11 @@ chat_model_example with tools(tavily)
 """
 from entities.tools.search.tavily.tavily_search import tavily_search_tool
 from langchain.agents import AgentType, initialize_agent
+from langchain_core.prompts.prompt import PromptTemplate
 
 from apps.entities.tools.utils.etc import current_date_tool
 from apps.entities.tools.weathers.weather_tool import get_weather
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
-from langchain_core.prompts.prompt import PromptTemplate
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
 

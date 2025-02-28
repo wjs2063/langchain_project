@@ -1,10 +1,12 @@
 import os
-from langchain.schema import AIMessage, HumanMessage
+
 from dotenv import load_dotenv
 from langchain.chains.retrieval_qa.base import RetrievalQA
+from langchain.schema import AIMessage, HumanMessage
 from langchain_chroma import Chroma
 from langchain_community.retrievers import WikipediaRetriever
 from langchain_openai import OpenAIEmbeddings
+
 from apps.entities.retrievals.prompt import prompt
 
 load_dotenv()
