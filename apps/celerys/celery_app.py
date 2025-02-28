@@ -30,8 +30,9 @@ def celery_add(x: int, y: int) -> int:
     return {"result": z}
 
 
-from apps.utils.smtp.send_email import send_email
 from typing import List
+
+from apps.utils.smtp.send_email import send_email
 
 
 @app.task

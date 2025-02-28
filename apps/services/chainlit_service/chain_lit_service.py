@@ -12,7 +12,8 @@ from apps.entities.auth.model import User, User_Pydantic
 from apps.entities.auth.schema import UserSchema
 from apps.entities.chat_models.chat_model_example import agent_with_tools
 from apps.entities.chat_models.chat_models import base_chat
-from apps.entities.memories.history import SlidingWindowBufferRedisChatMessageHistory
+from apps.entities.memories.history import \
+    SlidingWindowBufferRedisChatMessageHistory
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
 from apps.infras.redis._redis import _redis_url
 from apps.services.chainlit_service.prompt import chainlit_prompt
