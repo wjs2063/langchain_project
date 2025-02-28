@@ -41,7 +41,6 @@ prompt = PromptTemplate(
 # chain = LLMChain(llm=base_chat, prompt=prompt)
 chain = prompt | base_chat | structured_output_parser
 
-
 # print(
 #     {"question": "오늘의 날씨"}
 #     | RunnablePassthrough.assign(output=lambda x: chain.invoke(x["question"]))
