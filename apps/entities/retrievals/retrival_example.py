@@ -21,7 +21,7 @@ embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
 from langchain_core.prompts import PromptTemplate
 from langchain_milvus import Milvus
 
-milvus_uri = "http://172.30.1.21:19530"
+milvus_uri = "http://127.0.0.1:19530"
 database = Milvus(
     embedding_function=embeddings,
     connection_args={"uri": milvus_uri},
@@ -89,6 +89,8 @@ Wikipedia retrieval example
 wikipedia_retrieval = WikipediaRetriever(
     wiki_client="wikipedia",
     lang="ko",
-    doc_content_chars_max=300,
+    doc_content_chars_max=500,
     top_k_results=1,
 )
+
+print(wikipedia_retrieval.invoke("이재용이누구야?"))

@@ -45,10 +45,7 @@ def fetch_google_calendar_access_token():
 # response.raise_for_status()
 
 
-def fetch_google_calendar_events():
-    """
-    google calendar 에 등록된 스케쥴을 가져옵니다.
-    """
+def get_google_calendar_events():
     access_token = fetch_google_calendar_access_token()
     calendar_id = os.getenv("MY_GOOGLE_CALENDAR_USER_ID")
     url = f"https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events"
@@ -62,4 +59,4 @@ def fetch_google_calendar_events():
     return response.json()
 
 
-# fetch_google_calendar_events()
+# get_google_calendar_events()
