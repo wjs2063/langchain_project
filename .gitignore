@@ -34,7 +34,7 @@ MANIFEST
 *.manifest
 *.spec
 
-./apps/credentials
+/apps/credentials
 
 # Installer logs
 pip-log.txt
