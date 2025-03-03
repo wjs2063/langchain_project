@@ -27,18 +27,9 @@ DB_CONFIG = {
     },
     # 내가 등록할 앱네임들 지정
     "apps": {
-        # app 프로젝트 이름 지정
-        # "models": {
-        #     "models": ["apps.my_app.models", "apps.blogs.models", "apps.lottos.models", "aerich.models"],
-        #     "default_connection": "default"
-        # },
-        # "models": {
-        #     # models 가 정의된 app 내의 경로
-        #     "models": ["apps.my_app.models"],  # 모델이 정의된 경로
-        #     "default_connection": "default",
         "models": {
             # models 가 정의된 app 내의 경로
-            "models": ["apps.entities.auth.model"],  # 모델이 정의된 경로
+            "models": ["apps.infras.repository.user_repository.model"],
             "default_connection": "default",
         },
     },

@@ -1,5 +1,5 @@
-from .model import User, User_Pydantic
-from .schema import UserSchema
+from infras.repository.user_repository.model import User, User_Pydantic
+from infras.repository.user_repository.schema import UserSchema
 
 
 async def create_user(user: UserSchema) -> UserSchema:

@@ -28,7 +28,6 @@ response_schemas = [
 structured_output_parser = StructuredOutputParser.from_response_schemas(
     response_schemas
 )
-# json_output_parser = JsonOutputParser(pydantic_objects=SimpleAnswer)
 
 prompt = PromptTemplate(
     template="Answer the user question, Be answer korean language\n #format:{format_instructions}\n #question : {question} ",
