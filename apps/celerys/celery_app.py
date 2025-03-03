@@ -32,7 +32,7 @@ def celery_add(x: int, y: int) -> int:
 
 from typing import List
 
-from apps.utils.smtp.send_email import send_email
+from infras.utils.smtp.send_email import send_email
 
 
 @app.task
