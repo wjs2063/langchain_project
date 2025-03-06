@@ -168,12 +168,12 @@ from langchain_core.prompts.prompt import PromptTemplate
 from apps.entities.tools.utils.etc import current_date_tool
 from apps.entities.tools.weathers.weather_tool import get_weather
 from apps.entities.tools.wikipedias.wikipedia_tool import wiki_tool
-from apps.entities.tools.schedules.schedule_tool import get_my_schedule
+from apps.entities.tools.schedules.schedule_tool import fetch_my_schedule
 
 chat_model_with_tool = ChatOpenAI(model="gpt-4o", temperature=0.5)
 
 # tools = [tavily_search_tool, current_date_tool, wiki_tool, get_weather]
-tools = [get_my_schedule, current_date_tool, wiki_tool]
+tools = [fetch_my_schedule, current_date_tool, wiki_tool]
 prompt = PromptTemplate(
     template="""
 You are a highly competent scheduling Car Assistant and Schedule VPA Assistant. Your job is to answer the user's questions accurately and concisely in Korean.  

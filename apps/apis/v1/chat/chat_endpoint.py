@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Request, Response
+from pydantic import BaseModel, model_validator
 
 chat_router = APIRouter()
 
