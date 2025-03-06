@@ -47,7 +47,7 @@ def fetch_google_calendar_access_token():
 # response.raise_for_status()
 
 
-def get_google_calendar_events(time_min: datetime, interval: int = 1) -> dict:
+def fetch_google_calendar_events(time_min: datetime, interval: int = 1) -> dict:
     """
     google calendar 에 등록된 스케쥴을 가져옵니다.
     """
@@ -64,6 +64,7 @@ def get_google_calendar_events(time_min: datetime, interval: int = 1) -> dict:
         "Content-Type": "application/json",
         "Authorization": f"Bearer {access_token}",
     }
+
     response = requests.get(
         url,
         headers=header,
