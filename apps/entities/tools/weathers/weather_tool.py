@@ -13,7 +13,7 @@ load_dotenv()
 def get_weather(location: str) -> str:
     """주어진 위치의 현재 날씨 정보를 조회합니다."""
     # API 키 설정
-    api_key = os.getenv("OPENWEATHERMAP_API_KEY")  # 구글 코랩 사용 시
+    api_key = os.getenv("OPENWEATHERMAP_API_KEY")
 
     if not api_key:
         return "OpenWeatherMap API 키가 설정되지 않았습니다."

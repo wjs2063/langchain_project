@@ -18,7 +18,12 @@ from infras.repository.user_repository.user_repository import (
     AbstractUserRepository,
     UserRepository,
 )
-from apps.entities.chat_models.chat_models import base_chat, ChatOpenAI
+from apps.entities.chat_models.chat_models import (
+    base_chat,
+    ChatOpenAI,
+    groq_chat,
+    groq_deepseek,
+)
 
 
 class ChatService:
@@ -125,7 +130,7 @@ async def main():
     )
 
     chain_with_history = RunnableWithMessageHistory(
-        chainlit_prompt | base_chat,
+        chainlit_prompt | groq_deepseek,
         verbose=True,
         get_session_history=ChatService.get_history,
         history_messages_key="history",
