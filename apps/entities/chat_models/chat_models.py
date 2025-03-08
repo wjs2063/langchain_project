@@ -6,9 +6,24 @@ from dotenv import load_dotenv
 from langchain.tools import BaseTool, Tool
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
+import os
 
 load_dotenv()
 
+groq_chat = ChatGroq(
+    model="gemma2-9b-it",
+    temperature=0.7,
+    max_tokens=300,
+    api_key=os.getenv("GROQ_API_KEY"),
+)
+
+groq_deepseek = ChatGroq(
+    model="deepseek-r1-distill-qwen-32b",
+    temperature=0.7,
+    max_tokens=500,
+    api_key=os.getenv("GROQ_API_KEY"),
+)
 
 base_chat = ChatOpenAI(model="gpt-4o", temperature=0.5, verbose=True)
 prompt = ChatPromptTemplate.from_messages(

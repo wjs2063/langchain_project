@@ -47,15 +47,30 @@ def fetch_google_calendar_access_token():
 # response.raise_for_status()
 
 
-def fetch_google_calendar_events(time_min: datetime, interval: int = 1) -> dict:
+def fetch_google_calendar_events(current_time: datetime, interval: int = 0) -> dict:
     """
     google calendar 에 등록된 스케쥴을 가져옵니다.
     """
-    time_min, time_max = min([time_min, time_min + timedelta(days=interval)]), max(
-        [time_min, time_min + timedelta(days=interval)]
-    )
-    # time_max = (time_min + timedelta(days=interval)).isoformat().replace("+00:00", "Z")
-    print(time_min, time_max)
+    if interval < 0:
+        start_time = (current_time + timedelta(days=interval)).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        end_time = current_time.replace(
+            hour=23, minute=59, second=59, microsecond=999999
+        )
+    elif interval == 0:
+        start_time = current_time
+        end_time = current_time.replace(
+            hour=23, minute=59, second=59, microsecond=999999
+        )
+    else:
+        start_time = (current_time + timedelta(days=interval)).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        end_time = (current_time + timedelta(days=interval)).replace(
+            hour=23, minute=59, second=59, microsecond=999999
+        )
+
     access_token = fetch_google_calendar_access_token()
     calendar_id = os.getenv("MY_GOOGLE_CALENDAR_USER_ID")
     url = f"https://www.googleapis.com/calendar/v3/calendars/{calendar_id}/events"
@@ -69,8 +84,8 @@ def fetch_google_calendar_events(time_min: datetime, interval: int = 1) -> dict:
         url,
         headers=header,
         params={
-            "timeMin": time_min.isoformat().replace("+00:00", "Z"),
-            "timeMax": time_max.isoformat().replace("+00:00", "Z"),
+            "timeMin": start_time.isoformat().replace("+00:00", "Z"),
+            "timeMax": end_time.isoformat().replace("+00:00", "Z"),
         },
     )
     return response.json()
