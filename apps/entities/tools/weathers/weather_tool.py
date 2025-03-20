@@ -21,7 +21,7 @@ def get_weather(location: str) -> str:
     base_url = "http://api.openweathermap.org/data/2.5/weather"
 
     # 입력 전처리
-    location = location.strip("'\"")
+    location = location.strip()
 
     try:
         response = locator.geocode(location)

@@ -41,7 +41,7 @@ prompt = ChatPromptTemplate.from_messages(
             "User: '다음 주 여행 간다고 했었지?'\n"
             "AI: '맞아요! 여행 준비는 잘 되고 있어요? 어디로 가는 거죠?'",
         ),
-        MessagesPlaceholder(variable_name="history"),
+        MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{question}"),
     ]
 )

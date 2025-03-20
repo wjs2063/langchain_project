@@ -1,9 +1,9 @@
 from langchain_core.prompts import PromptTemplate
-from langchain.prompts import PromptTemplate
+from langchain.prompts import PromptTemplate, ChatPromptTemplate
 
-
-general_prompt = PromptTemplate.from_template(
-    template="""
+system_template = (
+    template
+) = """
 당신은 친절하고 유능한 AI 비서입니다.  
 사용자의 질문을 이해하고 명확하면서도 유용한 답변을 제공하세요.  
 가능하면 간결하게 대답하되, 필요한 경우 추가 정보를 제공하세요.  
@@ -11,7 +11,11 @@ general_prompt = PromptTemplate.from_template(
 
 📝 대화 기록:
 {chat_history}
+"""
 
-🙋 사용자: {question}
-🤖 AI:"""
+general_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", system_template),
+        ("user", "#Format: {format_instructions}\n\n#Question: {question}"),
+    ]
 )
