@@ -9,6 +9,7 @@ from langchain_core.runnables import (
     RunnablePassthrough,
     RunnableLambda,
 )
+from typing import List
 
 
 class KoreaWikiInput(BaseModel):
@@ -38,8 +39,20 @@ wiki_runnable_chain = RunnableParallel(
     ),  # 아래에서 최초 input 을 유지하는 방법임 . 다른의미는 없음
 ) | RunnableLambda(lambda x: {**x["input"]})
 
-print(
-    wiki_runnable_chain.invoke(
-        {"korea_input": "who is lee-jae-yong", "english_input": "지조암이 누구야"}
-    )
-)
+# print(
+#     wiki_runnable_chain.invoke(
+#         {"korea_input": "who is lee-jae-yong", "english_input": "지조암이 누구야"}
+#     )
+# )
+
+
+class Question(BaseModel):
+    domain: str = Field(..., description="The domain of the question.")
+    question: str = Field(..., description="The question text.")
+
+
+class QuestionResponse(BaseModel):
+    questions: List[Question]
+
+
+# print(base_chat.with_structured_output(QuestionResponse).invoke("안녕?"))

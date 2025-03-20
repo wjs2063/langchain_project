@@ -6,8 +6,16 @@ from langchain.callbacks.tracers import ConsoleCallbackHandler
 from langchain.schema import HumanMessage
 from langchain_core.messages import trim_messages
 from langchain_core.runnables import RunnableWithMessageHistory
-
+from apps.entities.chains.domain_selector_chain.domain_selector_chain import (
+    runnable_chain_branch,
+)
 from apps.entities.auth.crypt_passwd import pwd_context
+from entities.chains.domain_selector_chain.domain_selector_chain import (
+    merge_multi_domain_output,
+    create_dynamic_parallel_executor,
+)
+import asyncio
+from apps.services.chat_service import AbstractChain
 from infras.repository.user_repository.model import User, User_Pydantic
 from infras.repository.user_repository.schema import UserSchema
 from examples.chat_model_examples.chat_model_example import agent_with_tools
@@ -18,12 +26,28 @@ from infras.repository.user_repository.user_repository import (
     AbstractUserRepository,
     UserRepository,
 )
+from apps.entities.chains.domain_selector_chain.domain_selector_chain import (
+    multi_domain_chain,
+)
+from langchain_core.messages import AIMessage, HumanMessage
 from apps.entities.chat_models.chat_models import (
     base_chat,
     ChatOpenAI,
     groq_chat,
     groq_deepseek,
 )
+from apps.entities.chains.merge_output_chain.merge_output_chain import (
+    merge_output_chain,
+)
+
+"""
+1. 질문 분해 (ex. 날씨도 알려주고, 노래도 틀어줘)
+-> 날씨도메인 chain 이 날씨를 알려주고, 노래도메인 chain 이 노래를 틀어줘야함 
+2. 각 domain 에 해당하는 chain 이 각 결과를 반환 
+3. 최종적으로 output 전달 
+
+# key point 는 각 chat_history를 언제 save 할것인가.. 
+"""
 
 
 class ChatService:
@@ -38,6 +62,7 @@ class ChatService:
         self.chat_model = chat_model
         self.history = history
         self.session_id = session_id
+        self.history_buffers: list = list()
 
     @staticmethod
     def get_history(session_id: str) -> SlidingWindowBufferRedisChatMessageHistory:
@@ -59,7 +84,7 @@ class ChatService:
         )
         if not messages:
             return
-        history_msgs = ["-" * 10 + "대화 이력" + "-" * 10]
+        history_msgs = ["-" * 10 + "이전 대화 이력" + "-" * 10]
 
         for msg in messages:
             author = "User" if isinstance(msg, HumanMessage) else "AI"
@@ -69,26 +94,53 @@ class ChatService:
 
         for msg in history_msgs:
             await cl.Message(msg).send()
-        await cl.Message("-" * 10 + "대화 이력" + "-" * 10).send()
+        await cl.Message("-" * 10 + "이전 대화 이력" + "-" * 10).send()
 
     async def ainvoke(self, message: Message):
         _now = datetime.now()
         user_info = get_current_time()
+        # 첫 질문을 -> 소규모 질문으로 분할
+        history = await self.history.aget_messages()
         result = await self.chat_model.ainvoke(
             {
                 "question": message.content,
                 "ability": "chatting",
+                "chat_history": history,
                 "user_info": user_info,
-            },
-            config={
-                "configurable": {
-                    "session_id": self.session_id,
-                    "user_id": self.session_id,
-                },
-                "callbacks": [],
-            },
+            }
         )
-        return result
+
+        result = {**result, "chat_history": history}
+        parallel_tasks = set()
+        for data in result.get("questions", []):
+            for sub_chain in AbstractChain.__subclasses__():
+                if sub_chain.meets_condition(data=data):
+                    parallel_tasks.add(
+                        asyncio.create_task(
+                            sub_chain(
+                                client_information=dict(),
+                                previous_step={
+                                    **data,
+                                    "chat_history": result["chat_history"],
+                                },
+                            ).arun(
+                                request_information={
+                                    **data,
+                                    "chat_history": result["chat_history"],
+                                }
+                            )
+                        )
+                    )
+        response = await asyncio.gather(*parallel_tasks)
+        merged_output = merge_multi_domain_output(response)
+
+        response = await merge_output_chain.ainvoke(
+            {"question": message.content, "domain_answers": merged_output.content}
+        )
+        self.history_buffers.append(HumanMessage(content=message.content))
+        self.history_buffers.append(AIMessage(content=response.content))
+        await self.history.aadd_messages(self.history_buffers)
+        return response.content
 
 
 def get_current_time(*args, **kwargs) -> str:
@@ -130,15 +182,15 @@ async def main():
     )
 
     chain_with_history = RunnableWithMessageHistory(
-        chainlit_prompt | groq_deepseek,
+        multi_domain_chain,
         verbose=True,
         get_session_history=ChatService.get_history,
-        history_messages_key="history",
+        history_messages_key="chat_history",
         input_messages_key="question",
     )
     chat_service = ChatService(
         user_repository=UserRepository(),
-        chat_model=chain_with_history,
+        chat_model=multi_domain_chain,
         history=history,
         session_id=user_session_id,
     )
@@ -155,4 +207,5 @@ async def main():
 async def on_message(message: Message):
     chat_service = cl.user_session.get("chat_service")
     result = await chat_service.ainvoke(message=message)
-    await cl.Message(content=result.content).send()
+    # merge_multi_domain_output(result)
+    await cl.Message(content=result).send()
