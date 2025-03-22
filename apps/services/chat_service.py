@@ -9,7 +9,7 @@ from langchain.chains.base import Chain
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 
 
-class AbstractChain(ABC):
+class BaseChain(ABC):
 
     def __init__(self, client_information: dict, previous_step: dict):
         self.client_information = client_information
@@ -20,14 +20,16 @@ class AbstractChain(ABC):
     def meets_condition(data: dict) -> bool:
         raise NotImplementedError
 
+    @abstractmethod
     async def arun(self, request_information) -> dict:
         raise NotImplementedError
 
+    @abstractmethod
     def run(self) -> AIMessage:
         raise NotImplementedError
 
 
-class WeatherChain(AbstractChain):
+class WeatherChain(BaseChain):
 
     def __init__(
         self, client_information: dict, previous_step: dict, weather_chain=weather_agent
@@ -66,7 +68,7 @@ class WeatherChain(AbstractChain):
         return AIMessage()
 
 
-class ScheduleChain(AbstractChain):
+class ScheduleChain(BaseChain):
     def __init__(
         self,
         client_information: dict,
@@ -106,7 +108,7 @@ class ScheduleChain(AbstractChain):
         return AIMessage()
 
 
-class GeneralChain(AbstractChain):
+class GeneralChain(BaseChain):
     def __init__(
         self,
         client_information: dict,

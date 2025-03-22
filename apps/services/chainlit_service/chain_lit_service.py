@@ -15,7 +15,7 @@ from entities.chains.domain_selector_chain.domain_selector_chain import (
     create_dynamic_parallel_executor,
 )
 import asyncio
-from apps.services.chat_service import AbstractChain
+from apps.services.chat_service import BaseChain
 from infras.repository.user_repository.model import User, User_Pydantic
 from infras.repository.user_repository.schema import UserSchema
 from examples.chat_model_examples.chat_model_example import agent_with_tools
@@ -112,35 +112,45 @@ class ChatService:
 
         result = {**result, "chat_history": history}
         parallel_tasks = set()
-        for data in result.get("questions", []):
-            for sub_chain in AbstractChain.__subclasses__():
-                if sub_chain.meets_condition(data=data):
-                    parallel_tasks.add(
-                        asyncio.create_task(
-                            sub_chain(
-                                client_information=dict(),
-                                previous_step={
-                                    **data,
-                                    "chat_history": result["chat_history"],
-                                },
-                            ).arun(
-                                request_information={
-                                    **data,
-                                    "chat_history": result["chat_history"],
-                                }
-                            )
-                        )
-                    )
-        response = await asyncio.gather(*parallel_tasks)
+        response = await self.process_sub_chains(result)
         merged_output = merge_multi_domain_output(response)
 
         response = await merge_output_chain.ainvoke(
             {"question": message.content, "domain_answers": merged_output.content}
         )
-        self.history_buffers.append(HumanMessage(content=message.content))
-        self.history_buffers.append(AIMessage(content=response.content))
+        self.history_buffers.append(
+            HumanMessage(content=message.content, additional_kwargs={"test": "kwargs"})
+        )
+        self.history_buffers.append(
+            AIMessage(content=response.content, additional_kwargs={"test": "kwargs"})
+        )
         await self.history.aadd_messages(self.history_buffers)
         return response.content
+
+    async def process_sub_chains(self, result):
+        parallel_tasks = set()
+
+        for data in result.get("questions", []):
+            for sub_chain in self.get_sub_chains(data):
+                task = asyncio.create_task(
+                    sub_chain(
+                        client_information={},
+                        previous_step={**data, "chat_history": result["chat_history"]},
+                    ).arun(
+                        request_information={
+                            **data,
+                            "chat_history": result["chat_history"],
+                        }
+                    )
+                )
+                parallel_tasks.add(task)
+
+        return await asyncio.gather(*parallel_tasks)
+
+    def get_sub_chains(self, data):
+        return [
+            sub for sub in BaseChain.__subclasses__() if sub.meets_condition(data=data)
+        ]
 
 
 def get_current_time(*args, **kwargs) -> str:
@@ -181,13 +191,6 @@ async def main():
         session_id=user_session_id, url=_redis_url, buffer_size=8
     )
 
-    chain_with_history = RunnableWithMessageHistory(
-        multi_domain_chain,
-        verbose=True,
-        get_session_history=ChatService.get_history,
-        history_messages_key="chat_history",
-        input_messages_key="question",
-    )
     chat_service = ChatService(
         user_repository=UserRepository(),
         chat_model=multi_domain_chain,
