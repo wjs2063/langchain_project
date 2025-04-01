@@ -2,49 +2,28 @@
 ChatModel
 """
 
-import logging
-import typing
-import uuid
-from typing import Optional, Any, Sequence, Union, Callable, Iterator
-
-from langchain_core.callbacks import Callbacks, CallbackManagerForLLMRun
-from langchain_core.language_models import (
-    BaseChatModel,
-    SimpleChatModel,
-    LanguageModelInput,
-)
-from langchain_core.messages import BaseMessage
-from langchain_core.outputs import LLMResult, ChatResult, ChatGenerationChunk
-from langchain_core.runnables import Runnable
-from langchain_core.tools import BaseTool
-from langchain_openai import ChatOpenAI
-from langchain_core.runnables import ConfigurableField
-from langchain.chat_models import init_chat_model
-import os
 from dotenv import load_dotenv
+from langchain.tools import BaseTool, Tool
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
+import os
 
 load_dotenv()
-#
-#
-# class CustomChatModel(BaseChatModel):
-#
-#     def _generate(self, messages: list[BaseMessage], stop: Optional[list[str]] = None,
-#                   run_manager: Optional[CallbackManagerForLLMRun] = None, **kwargs: Any) -> ChatResult:
-#         pass
-#
-#     def _stream(self, messages: list[BaseMessage], stop: Optional[list[str]] = None,
-#                 run_manager: Optional[CallbackManagerForLLMRun] = None, **kwargs: Any) -> Iterator[ChatGenerationChunk]:
-#         pass
-#
-#     @property
-#     def _llm_type(self) -> str:
-#         pass
-#
-#     def bind_tools(self, tools: Sequence[
-#         Union[typing.Dict[str, Any], type, Callable, BaseTool]  # noqa: UP006
-#     ], **kwargs: Any) -> Runnable[LanguageModelInput, BaseMessage]:
-#         pass
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+groq_chat = ChatGroq(
+    model="gemma2-9b-it",
+    temperature=0.7,
+    max_tokens=300,
+    api_key=os.getenv("GROQ_API_KEY"),
+)
+
+groq_deepseek = ChatGroq(
+    model="deepseek-r1-distill-qwen-32b",
+    temperature=0.7,
+    max_tokens=500,
+    api_key=os.getenv("GROQ_API_KEY"),
+)
 
 base_chat = ChatOpenAI(model="gpt-4o", temperature=0.5, verbose=True)
 prompt = ChatPromptTemplate.from_messages(
@@ -62,7 +41,7 @@ prompt = ChatPromptTemplate.from_messages(
             "User: '다음 주 여행 간다고 했었지?'\n"
             "AI: '맞아요! 여행 준비는 잘 되고 있어요? 어디로 가는 거죠?'",
         ),
-        MessagesPlaceholder(variable_name="history"),
+        MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{question}"),
     ]
 )
