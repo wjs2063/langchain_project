@@ -4,6 +4,7 @@ from apps.entities.chat_models.chat_models import groq_chat
 from apps.entities.chains.general_chat_chain.prompt import general_prompt
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
+import asyncio
 
 
 class Answer(BaseModel):
@@ -17,8 +18,3 @@ prompt = general_prompt.partial(
 )
 
 general_chain = prompt | groq_chat | output_parser
-import asyncio
-
-# general_chain = {"input": RunnablePassthrough()} | RunnableLambda(
-#     lambda x: {"input": x["input"], "output": chain}
-# )
