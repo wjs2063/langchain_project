@@ -1,27 +1,21 @@
 from datetime import datetime
-
+import traceback
 import chainlit as cl
 from chainlit.message import Message
-from langchain.callbacks.tracers import ConsoleCallbackHandler
-from langchain.schema import HumanMessage
 from langchain_core.messages import trim_messages
-from langchain_core.runnables import RunnableWithMessageHistory
-from apps.entities.chains.domain_selector_chain.domain_selector_chain import (
-    runnable_chain_branch,
-)
+
 from apps.entities.auth.crypt_passwd import pwd_context
 from entities.chains.domain_selector_chain.domain_selector_chain import (
     merge_multi_domain_output,
-    create_dynamic_parallel_executor,
 )
+from apps.entities.utils.time import get_current_time
 import asyncio
+from apps.exceptions.exception_handler import CustomException
 from apps.services.chat_service import BaseChain
 from infras.repository.user_repository.model import User, User_Pydantic
 from infras.repository.user_repository.schema import UserSchema
-from examples.chat_model_examples.chat_model_example import agent_with_tools
 from apps.entities.memories.history import SlidingWindowBufferRedisChatMessageHistory
 from apps.infras.redis._redis import _redis_url
-from apps.services.chainlit_service.prompt import chainlit_prompt
 from infras.repository.user_repository.user_repository import (
     AbstractUserRepository,
     UserRepository,
@@ -31,10 +25,7 @@ from apps.entities.chains.domain_selector_chain.domain_selector_chain import (
 )
 from langchain_core.messages import AIMessage, HumanMessage
 from apps.entities.chat_models.chat_models import (
-    base_chat,
     ChatOpenAI,
-    groq_chat,
-    groq_deepseek,
 )
 from apps.entities.chains.merge_output_chain.merge_output_chain import (
     merge_output_chain,
@@ -97,21 +88,16 @@ class ChatService:
         await cl.Message("-" * 10 + "이전 대화 이력" + "-" * 10).send()
 
     async def ainvoke(self, message: Message):
-        _now = datetime.now()
-        user_info = get_current_time()
         # 첫 질문을 -> 소규모 질문으로 분할
         history = await self.history.aget_messages()
-        result = await self.chat_model.ainvoke(
-            {
-                "question": message.content,
-                "ability": "chatting",
-                "chat_history": history,
-                "user_info": user_info,
-            }
-        )
-
-        result = {**result, "chat_history": history}
-        parallel_tasks = set()
+        request_information = {
+            "question": message.content,
+            "ability": "chatting",
+            "chat_history": history,
+            "user_info": get_current_time(region="kr"),
+        }
+        result = await self.chat_model.ainvoke(request_information)
+        result = {**result, **request_information}
         response = await self.process_sub_chains(result)
         merged_output = merge_multi_domain_output(response)
 
@@ -128,24 +114,30 @@ class ChatService:
         return response.content
 
     async def process_sub_chains(self, result):
-        parallel_tasks = set()
+        try:
+            parallel_tasks = set()
 
-        for data in result.get("questions", []):
-            for sub_chain in self.get_sub_chains(data):
-                task = asyncio.create_task(
-                    sub_chain(
-                        client_information={},
-                        previous_step={**data, "chat_history": result["chat_history"]},
-                    ).arun(
-                        request_information={
-                            **data,
-                            "chat_history": result["chat_history"],
-                        }
+            for data in result.get("questions", []):
+                for sub_chain in self.get_sub_chains(data):
+                    task = asyncio.create_task(
+                        sub_chain(
+                            client_information={},
+                        ).arun(
+                            request_information={
+                                **data,
+                                "chat_history": result["chat_history"],
+                                "user_info": result["user_info"],
+                            }
+                        )
                     )
-                )
-                parallel_tasks.add(task)
-
-        return await asyncio.gather(*parallel_tasks)
+                    parallel_tasks.add(task)
+        except Exception as e:
+            error_trace = traceback.format_exc()
+            raise CustomException(
+                status_code=500, detail=error_trace, trace=error_trace
+            )
+        else:
+            return await asyncio.gather(*parallel_tasks)
 
     def get_sub_chains(self, data):
         return [

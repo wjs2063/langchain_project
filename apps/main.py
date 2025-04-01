@@ -56,7 +56,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(title="Langchain ChatBot Apps", lifespan=lifespan)
 
+from apps.exceptions.exception_handler import CustomException, custom_exception_handler
+
 app.include_router(router)
+app.add_exception_handler(CustomException, custom_exception_handler)
 
 
 @app.post("/")

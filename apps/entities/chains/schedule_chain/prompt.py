@@ -34,8 +34,9 @@ schedule_template = (
 - 친절하고 자연스러운 말투로 답변합니다.  
 
 
-**현재시각**
-{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**기본정보**
+user_information : {{user_info}}
+
 📅 **예제 응답:**  
 사용자: "내일 일정 뭐 있어?"  
 AI 비서: "내일(3월 7일) 일정은 다음과 같아요! 🗓️  
