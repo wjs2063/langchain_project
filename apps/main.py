@@ -1,12 +1,14 @@
-from fastapi import FastAPI
-from apps.apis.v1.v1_endpoint import chat_router
-from chainlit.utils import mount_chainlit
-from tortoise.contrib.fastapi import register_tortoise, RegisterTortoise
+import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
+
+from chainlit.utils import mount_chainlit
+from fastapi import FastAPI
 from tortoise import Tortoise, generate_config, run_async
+from tortoise.contrib.fastapi import RegisterTortoise, register_tortoise
+
 from apps.apis.api_routes import router
-import os
+from apps.apis.v1.v1_endpoint import v1_router
 from apps.infras.db.postgres import DB_CONFIG
 
 
@@ -15,7 +17,7 @@ async def lifespan_test(_app: FastAPI) -> AsyncGenerator[None, None]:
     config = generate_config(
         os.getenv("TORTOISE_TEST_DB", "sqlite://:memory:"),
         app_modules={
-            "apps": ["entities.auth.model"],
+            "apps": ["infras.repository.user_repository.model"],
         },
         testing=True,
         connection_label="default",
@@ -54,8 +56,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(title="Langchain ChatBot Apps", lifespan=lifespan)
 
-app.include_router(chat_router)
+from apps.exceptions.exception_handler import CustomException, custom_exception_handler
+
 app.include_router(router)
+app.add_exception_handler(CustomException, custom_exception_handler)
 
 
 @app.post("/")

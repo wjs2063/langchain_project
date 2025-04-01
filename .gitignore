@@ -7,7 +7,7 @@ __pycache__/
 # C extensions
 *.so
 *.pdf
-dockers/volumes
+builds/volumes
 # Distribution / packaging
 .Python
 build/
@@ -33,6 +33,8 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+
+/apps/credentials
 
 # Installer logs
 pip-log.txt
