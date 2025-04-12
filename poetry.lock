@@ -1353,6 +1353,31 @@ httpx = ["httpx[httpx] (>=0.23,<0.24)"]
 redis = ["redis[redis] (>=4.3,<5.0)"]
 
 [[package]]
+name = "fastapi-mcp"
+version = "0.1.4"
+description = "Automatic MCP server generator for FastAPI applications - converts FastAPI endpoints to MCP tools for LLM integration"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "fastapi_mcp-0.1.4-py3-none-any.whl", hash = "sha256:a3a97bc7b691c5235cf7a6454136530515cb6bd57c698fe69c5c4aeaefdd8323"},
+    {file = "fastapi_mcp-0.1.4.tar.gz", hash = "sha256:c6696e8f519af5f45247ad0b28f8643c504c610fe61bcf51f6b37a60c96972bd"},
+]
+
+[package.dependencies]
+fastapi = ">=0.100.0"
+httpx = ">=0.24.0"
+inspect-mate = ">=0.0.2"
+mcp = ">=1.3.0"
+pydantic = ">=2.0.0"
+pydantic-settings = ">=2.5.2"
+requests = ">=2.25.0"
+rich = ">=13.0.0"
+tomli = ">=2.2.1"
+typer = ">=0.9.0"
+uvicorn = ">=0.20.0"
+
+[[package]]
 name = "filelock"
 version = "3.17.0"
 description = "A platform independent file lock."
@@ -2127,6 +2152,18 @@ files = [
 ]
 
 [[package]]
+name = "inspect-mate"
+version = "0.0.2"
+description = "Extend the ``inspect`` standard library."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "inspect_mate-0.0.2-py2-none-any.whl", hash = "sha256:de7e5eb9f8231e741661aadbdbd2ae1b6e607241705abad9695790fd5c9440ab"},
+    {file = "inspect_mate-0.0.2.tar.gz", hash = "sha256:a51907976d9624d0eeaf0d2207a67c95d174a2fa3aabfdaee53eeaf91d973bdd"},
+]
+
+[[package]]
 name = "iso8601"
 version = "2.1.0"
 description = "Simple module to parse ISO 8601 dates"
@@ -2887,6 +2924,33 @@ packaging = ">=17.0"
 dev = ["marshmallow[tests]", "pre-commit (>=3.5,<5.0)", "tox"]
 docs = ["autodocsumm (==0.2.14)", "furo (==2024.8.6)", "sphinx (==8.1.3)", "sphinx-copybutton (==0.5.2)", "sphinx-issues (==5.0.0)", "sphinxext-opengraph (==0.9.1)"]
 tests = ["pytest", "simplejson"]
+
+[[package]]
+name = "mcp"
+version = "1.6.0"
+description = "Model Context Protocol SDK"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "mcp-1.6.0-py3-none-any.whl", hash = "sha256:7bd24c6ea042dbec44c754f100984d186620d8b841ec30f1b19eda9b93a634d0"},
+    {file = "mcp-1.6.0.tar.gz", hash = "sha256:d9324876de2c5637369f43161cd71eebfd803df5a95e46225cab8d280e366723"},
+]
+
+[package.dependencies]
+anyio = ">=4.5"
+httpx = ">=0.27"
+httpx-sse = ">=0.4"
+pydantic = ">=2.7.2,<3.0.0"
+pydantic-settings = ">=2.5.2"
+sse-starlette = ">=1.6.1"
+starlette = ">=0.27"
+uvicorn = ">=0.23.1"
+
+[package.extras]
+cli = ["python-dotenv (>=1.0.0)", "typer (>=0.12.4)"]
+rich = ["rich (>=13.9.4)"]
+ws = ["websockets (>=15.0.1)"]
 
 [[package]]
 name = "mdurl"
@@ -5450,6 +5514,26 @@ files = [
 catalogue = ">=2.0.3,<2.1.0"
 
 [[package]]
+name = "sse-starlette"
+version = "2.2.1"
+description = "SSE plugin for Starlette"
+category = "main"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "sse_starlette-2.2.1-py3-none-any.whl", hash = "sha256:6410a3d3ba0c89e7675d4c273a301d64649c03a5ef1ca101f10b47f895fd0e99"},
+    {file = "sse_starlette-2.2.1.tar.gz", hash = "sha256:54470d5f19274aeed6b2d473430b08b4b379ea851d953b11d7f1c4a2c118b419"},
+]
+
+[package.dependencies]
+anyio = ">=4.7.0"
+starlette = ">=0.41.3"
+
+[package.extras]
+examples = ["fastapi"]
+uvicorn = ["uvicorn (>=0.34.0)"]
+
+[[package]]
 name = "starlette"
 version = "0.41.3"
 description = "The little ASGI library that shines."
@@ -6625,4 +6709,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "1f594d6da8d934176120fc53d81abaaf6926d51c9a2085d1ebeb1b44eb06f9b8"
+content-hash = "a4f0de6737214adce0b79a495c2c0fc9a8347d64674c9c2c0def0ca0cced8834"

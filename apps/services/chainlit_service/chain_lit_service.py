@@ -42,6 +42,41 @@ from apps.entities.chains.merge_output_chain.merge_output_chain import (
 
 
 class ChatService:
+    """
+    ChatService provides functionality for managing user interactions with a chat system
+    that incorporates advanced AI-driven conversation handling. It is designed to integrate
+    with repositories, models, and chat history services to facilitate seamless conversational
+    experiences.
+
+    ChatService allows retrieving and displaying chat history, processing user queries, and
+    invoking AI models to generate responses. It also supports managing concurrent tasks for
+    sub-chains and handling complex multi-domain outputs efficiently.
+
+    Attributes:
+        _user_repository (AbstractUserRepository): The repository for managing user data.
+        chat_model (ChatOpenAI): The AI model used for generating chat responses.
+        history (SlidingWindowBufferRedisChatMessageHistory): Handles storing and retrieving chat history.
+        session_id (str): A unique identifier for the chat session.
+        history_buffers (list): Temporarily stores recent chat messages for processing.
+
+    Methods:
+        get_history(session_id: str) -> SlidingWindowBufferRedisChatMessageHistory
+            Retrieves the history instance associated with the given session ID.
+
+        display_chat_history(cl)
+            Displays the chat history on the user interface.
+
+        ainvoke(message: Message)
+            Processes the user's input message and invokes the chat model to generate a response.
+
+        process_sub_chains(result)
+            Orchestrates the execution of multiple asynchronous tasks for sub-chains.
+
+        get_sub_chains(data)
+            Retrieves sub-chains matching specific conditions.
+
+    """
+
     def __init__(
         self,
         user_repository: AbstractUserRepository,
@@ -146,6 +181,19 @@ class ChatService:
 
 
 def get_current_time(*args, **kwargs) -> str:
+    """
+    Retrieve and format the current date and time as a human-readable string.
+
+    This function uses the current local time to construct a formatted string
+    representing the date and time in a specific Korean format.
+
+    Args:
+        *args: Additional positional arguments, unused.
+        **kwargs: Additional keyword arguments, unused.
+
+    Returns:
+        str: Formatted string representing the current date and time.
+    """
     _now = datetime.now()
     return f"""
     현재 날짜 : {_now.year}년 {_now.month}월 {_now.day}일 {_now.hour}시 {_now.minute}분 
@@ -153,6 +201,37 @@ def get_current_time(*args, **kwargs) -> str:
 
 
 async def get_user(user_id: str, password: str):
+    """
+    Fetch a user's details from the database and validate their credentials.
+
+    This asynchronous function retrieves a user's account information
+    from the database based on the provided user ID. It then verifies
+    whether the stored credentials match the provided password. If the
+    user is not found or the password is incorrect, a validation error
+    is raised. Upon successful validation, the user's details are
+    returned in the form of a schema object.
+
+    Arguments:
+        user_id: str
+            The unique identifier of the user, which is required for
+            fetching their details from the database.
+        password: str
+            The plaintext password provided by the user. It will be
+            compared against the hashed password stored in the
+            database for verification.
+
+    Raises:
+        ValueError
+            Raised if the provided credentials are invalid. Specifically,
+            an error occurs if the user does not exist or if the password
+            does not match the value stored in the database.
+
+    Returns:
+        UserSchema
+            An object containing the user's detailed information, formatted
+            according to the UserSchema structure, if authentication is
+            successful.
+    """
     user = await UserRepository().get_user(user_id=user_id)
     if not user:
         raise ValueError(f"회원가입을 진행해주세요")
@@ -163,6 +242,17 @@ async def get_user(user_id: str, password: str):
 
 @cl.password_auth_callback
 async def auth_callback(user_id: str, password: str):
+    """
+    Asynchronous callback function for password-based authentication that verifies user credentials and returns user data.
+
+    Arguments:
+        user_id: A string representing the unique identifier of the user.
+        password: A string representing the password of the user.
+
+    Returns:
+        cl.User: A user object containing the verified user's identifier and
+        metadata including their role and authentication provider.
+    """
     res = await get_user(user_id, password)
     # cl.user_session.set(res.user_id, res.user_name)
     return cl.User(
@@ -173,6 +263,20 @@ async def auth_callback(user_id: str, password: str):
 
 @cl.on_chat_start
 async def main():
+    """
+    Asynchronous function that initiates a chat session, retrieves a session ID
+    from the user, and sets up necessary services for chat interaction. It also
+    integrates Redis-based history management and sends relevant messages to the user.
+
+    Parameters:
+        None
+
+    Raises:
+        None
+
+    Returns:
+        None
+    """
     user_res = await cl.AskUserMessage("가져올 세션id를 입력해주세요").send()
     user_session_id = user_res["output"]
 
@@ -200,6 +304,19 @@ async def main():
 
 @cl.on_message
 async def on_message(message: Message):
+    """
+    An asynchronous function that handles incoming messages and processes them using a chat service.
+
+    The function retrieves the chat_service object from the user session,
+    invokes the chat_service with the received message, and sends the processed
+    output as a new chat message.
+
+    Args:
+        message (Message): The incoming message object to be processed.
+
+    Returns:
+        None
+    """
     chat_service = cl.user_session.get("chat_service")
     result = await chat_service.ainvoke(message=message)
     # merge_multi_domain_output(result)
