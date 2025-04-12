@@ -11,38 +11,22 @@ from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from apps.entities.chains.wikipedia_chain.wikipedia_chain import wikipedia_chain
 
 
-class BaseChain(ABC):
+class AbstractProcessingChain(ABC):
     """
-    Represents an abstract base chain for processing client requests.
+    AbstractProcessingChain serves as a blueprint for creating processing chains
+    based on specific client information. It defines the structure and required
+    methods to be implemented by subclasses, ensuring compatibility and extending functionality.
 
-    This class serves as a base for creating chains that handle client
-    information and execute specific operations depending on the
-    implemented methods. It provides a framework for defining chains
-    with an abstract structure that subclasses must implement.
+    This abstract base class is designed to work with processing chains that execute specific
+    operations asynchronously or synchronously, validate input data based on conditions, and
+    parse various types of responses. Subclasses must override the abstract methods to provide
+    their own implementation details.
 
     Attributes:
-        client_information (dict): A dictionary containing information
-            related to the client.
-        chain (RunnableSequence): A sequence to be executed as part of
-            the chain's workflow.
-
-    Methods:
-        parse_response(response):
-            Parses and extracts the output from a given response of
-            varying types including string, AIMessage, or dictionary.
-
-        meets_condition(data):
-            Checks if the provided data satisfies specific conditions.
-            Subclasses must implement this method.
-
-        arun(request_information):
-            Asynchronously processes a request with the given information
-            and returns a dictionary response. Subclasses must implement
-            this method.
-
-        run():
-            Synchronously executes the chain's process and returns an
-            AIMessage. Subclasses must implement this method.
+        client_information (dict): A dictionary containing client-specific details that influence
+        the behavior of the processing chain.
+        chain (RunnableSequence): Represents the processing chain. Must be initialized later
+        in subclasses.
     """
 
     def __init__(self, client_information: dict):
@@ -75,18 +59,15 @@ class BaseChain(ABC):
         raise NotImplementedError
 
 
-class WeatherChain(BaseChain):
+class WeatherChain(AbstractProcessingChain):
     """
-    WeatherChain is a specialized implementation of the BaseChain tailored for
-    processing weather-related queries. It leverages a weather-specific
-    processing agent to fulfill and respond to user requests within the
-    context of weather data and conversations.
+    A class representing a processing chain for weather-related queries.
 
-    This class is responsible for determining the relevance of the input data
-    to weather-related queries, invoking a weather agent to process input
-    asynchronously, and returning structured responses. It operates as a
-    chained component suitable for integration into larger systems handling
-    domain-specific user interactions.
+    This class extends the AbstractProcessingChain and is intended to handle queries
+    related to weather information. It processes input data and interacts with
+    a weather agent to retrieve and deliver weather-related responses. The chain
+    ensures that it operates under the correct domain ("weather") and provides
+    asynchronous functionality to handle real-time or asynchronous data processing.
     """
 
     def __init__(self, client_information: dict, weather_chain=weather_agent):
@@ -120,24 +101,19 @@ class WeatherChain(BaseChain):
         return AIMessage()
 
 
-class ScheduleChain(BaseChain):
+class ScheduleChain(AbstractProcessingChain):
     """
-    Represents a schedule chain process within a chain system.
+    Represents a processing chain specifically used for scheduling-related tasks.
 
-    The class provides methods to check applicable conditions and facilitate asynchronous
-    or synchronous interaction with a schedule agent chain. It encapsulates the logic for
-    handling input request information and generating the corresponding responses using
-    an agent-based approach.
+    The ScheduleChain is an extension of the AbstractProcessingChain and is
+    used to manage and execute operations associated with the "schedule"
+    domain. It contains functionality to determine its applicability based on
+    input data and processes requests using an underlying chain dedicated to
+    scheduling.
 
     Attributes:
-        chain: The schedule chain agent used to process input request information.
+        chain: The processing chain responsible for handling scheduling tasks.
 
-    Methods:
-        meets_condition(data): Checks if the input data meets specific criteria for
-            the schedule domain.
-        arun(request_information): Asynchronously processes the given request
-            information and returns a ChainResponse object.
-        run(): Synchronously generates an AIMessage instance.
     """
 
     def __init__(
@@ -170,14 +146,35 @@ class ScheduleChain(BaseChain):
         return AIMessage()
 
 
-class GeneralChain(BaseChain):
+class GeneralChain(AbstractProcessingChain):
     """
-    Represents a general-purpose chain for processing data in a defined format.
+    Represents a specialized processing chain for handling general queries.
 
-    This class extends the BaseChain and provides an implementation for handling
-    general-type data. It uses an injected general chain for managing specific
-    operational details and includes methods for verifying conditions and
-    processing requests asynchronously.
+    The GeneralChain class inherits from AbstractProcessingChain and serves as
+    a specific implementation for processing data pertaining to the 'general'
+    domain. It provides methods to invoke a predefined chain asynchronously or
+    synchronously, ensuring that the provided data meets specified conditions
+    and formatting the output accordingly.
+
+    Attributes:
+    chain : general_chain
+        The processing chain that handles specific requests.
+
+    Methods:
+    __init__(client_information: dict, general_chain)
+        Initializes the GeneralChain instance with client information and the
+        processing chain.
+
+    meets_condition(data: dict) -> bool
+        Static method that checks if the provided data matches the 'general'
+        domain condition.
+
+    arun(request_information: dict) -> ChainResponse
+        Asynchronously processes the input request information and invokes the
+        associated chain asynchronously. Returns a ChainResponse object.
+
+    run() -> AIMessage
+        Synchronously invokes the chain and returns the processed AI message.
     """
 
     def __init__(
@@ -210,23 +207,13 @@ class GeneralChain(BaseChain):
         return AIMessage()
 
 
-class WikipediaChain(BaseChain):
+class WikipediaChain(AbstractProcessingChain):
     """
-    A chain implementation for handling Wikipedia-specific queries.
+    Chain handling interactions specific to Wikipedia.
 
-    The WikipediaChain class is designed to process queries related to
-    Wikipedia by interacting with a predefined chain. It serves as an
-    integration point for processing user data and invoking a suitable
-    response chain for handling queries within the "wikipedia" domain.
-
-    Attributes:
-    chain: The predefined chain handling Wikipedia-related queries.
-
-    Methods:
-    - meets_condition(data): Static method to verify if the provided data is
-      within the "wikipedia" domain.
-    - arun(request_information): Asynchronous method to process the request
-      information and invoke the chain to generate a response.
+    The WikipediaChain class processes input data related to Wikipedia queries and
+    uses an underlying chain to process questions and retrieve relevant responses
+    based on the provided context such as chat history and user information.
     """
 
     def __init__(self, client_information: dict):
