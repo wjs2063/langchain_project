@@ -29,12 +29,16 @@ def format_docs(docs):
 
 
 wikipedia_chain = (
-    {"context": wiki_retriever | format_docs, "question": RunnablePassthrough()}
+    {
+        "context": wiki_retriever | format_docs,
+        "question": RunnablePassthrough(),
+        "user_info": {},
+    }
     | prompt
     | base_chat
     #    | StrOutputParser()
 )
 
-# print(wikipedia_chain.invoke("tokyo"))
+print(wikipedia_chain.invoke("tokyo"))
 # asyncio.run(run_chain(ko_retriever, en_retriever, text="문재인"))
 # RunnableParallel

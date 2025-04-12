@@ -1,13 +1,7 @@
-import asyncio
+from langchain_core.runnables import RunnableLambda
 import os
-import sys
-import urllib.parse
-import urllib.request
-
 import aiohttp
-from aiohttp import ClientSession
 from dotenv import load_dotenv
-from langchain_core.tools import Tool, tool
 
 # .env 파일 로드
 load_dotenv()
@@ -57,5 +51,10 @@ async def fetch_naver_search(query: str, display: int = 10) -> dict:
             return response_body
 
 
-# 비동기 함수 실행
+async def run_naver_search(x):
+    return await fetch_naver_search(query=x["question"])
+
+
+naver_search_runnable = RunnableLambda(run_naver_search)
+# 비동r기 함수 실행
 # asyncio.run(fetch_naver_search(query="겨울", display=5))
