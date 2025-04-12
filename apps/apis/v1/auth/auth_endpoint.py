@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
-from jose import jwt
-from fastapi.security import OAuth2PasswordRequestForm
 from dotenv import load_dotenv
-from apps.entities.auth.schema import UserCreate, UserSchema
-from apps.entities.auth.model import User, User_Pydantic
-from apps.entities.auth.crypt_passwd import pwd_context
+from fastapi import APIRouter, HTTPException
+
 from apps.entities.auth.crud import create_user
+from apps.entities.auth.crypt_passwd import pwd_context
+from infras.repository.user_repository.schema import UserCreate, UserSchema
+from apps.infras.repository.user_repository.user_repository import user_repository
 
 load_dotenv()
 
@@ -24,3 +23,12 @@ async def sigunp_for_chatbot(user_create: UserCreate):
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=500)
     return {"message": "User created successfully"}
+
+
+@auth_router.get("/user")
+async def get_user(user_id: str):
+    try:
+        user = await user_repository.get_user(user_id=user_id)
+    except Exception as e:
+        raise HTTPException(detail=str(e), status_code=404)
+    return user
