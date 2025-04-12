@@ -47,13 +47,29 @@ multi_domain_chain = prompt | groq_chat | parser
 
 def merge_multi_domain_output(datas: list) -> AIMessage:
     """
-    input : {"domain": str , "question" : str }
+    Summarizes and merges outputs from multiple domain-specific models into a single AIMessage object.
+
+    This function combines question-answer pairs from multiple datasets, each related
+    to a different domain, into a unified text format. Each question-answer pair
+    is formatted with its corresponding domain and output, then joined together
+    as a single string for the AIMessage content.
+
+    Args:
+        datas (list): A list of data objects where each entry represents
+            domain-specific input-output information. The structure of the
+            data object should include input (with domain and question) and
+            output fields.
+
+    Returns:
+        AIMessage: An AIMessage object containing the combined
+        domain-specific question-answer pairs as its content.
     """
     try:
         answer = []
         for data in datas:
             # if isinstance(data, AIMessage):
             #     data = data.content
+            data = data.model_dump()
             partial_qa_pair = f"""{data["input"]['domain']} question : {data["input"]["question"]}\n output : {data["output"]}"""
             answer.append(partial_qa_pair)
     except Exception as e:

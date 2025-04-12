@@ -15,6 +15,22 @@ from apps.entities.chat_models.chat_models import base_chat
 
 
 class SimpleAnswer(BaseModel):
+    """
+    Represents a simple answer model with summary, category, and answer fields.
+
+    This class is designed to encapsulate a simple structure for representing an
+    answer, its associated category, and a brief summary. It leverages `pydantic.BaseModel`
+    for data validation and serialization.
+
+    Attributes:
+        summary:
+            A brief textual summary of the answer's context or focus.
+        category:
+            The category or classification under which the answer falls.
+        answer:
+            The actual textual content of the answer or response.
+    """
+
     summary: str = Field(description="summary")
     category: str = Field(description="category")
     answer: str = Field(description="answer")
@@ -61,11 +77,34 @@ batch Usage
 
 
 async def chain_ainvoke(input_dict):
+    """
+    Async function to process input asynchronously through a chain call.
+
+    Parameters:
+        input_dict (dict): Dictionary containing input data for the chain call.
+
+    Returns:
+        Any: Result of the asynchronous chain invocation.
+    """
     print(f"ainvoke 콜 시작!, {input_dict}")
     return await chain.ainvoke(input_dict)
 
 
 async def main(*args):
+    """
+        Execute multiple asynchronous calls to `chain_ainvoke` concurrently for
+        different input values and calculate the time taken for execution.
+
+        This function demonstrates the use of asyncio.gather to perform multiple
+        asynchronous operations at the same time and returns their results.
+
+    Args:
+        args (*): Positional arguments that are not used within this function.
+
+    Returns:
+        list: A list of responses obtained from the asynchronous calls to
+              `chain_ainvoke`.
+    """
     start_time = time.time()
     responses = await asyncio.gather(
         *[
