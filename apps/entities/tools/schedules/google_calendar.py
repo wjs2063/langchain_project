@@ -11,6 +11,19 @@ load_dotenv()
 
 
 def create_google_jwt_token():
+    """
+    Generate a Google JWT token for authentication
+
+    This function creates a JSON Web Token (JWT) to authenticate with Google API services.
+    The payload includes information such as the issuing entity, scope, audience, issued time,
+    and expiration time. The token is signed using RS256 algorithm.
+
+    Returns:
+        str: The signed JWT token.
+
+    Raises:
+        EnvironmentError: If one or more of the required environment variables are not set.
+    """
     iat = time.time()
     exp = iat + 3600
     payload = {
@@ -32,6 +45,19 @@ def create_google_jwt_token():
 
 
 def fetch_google_calendar_access_token():
+    """
+    Fetches an access token for Google Calendar API using a signed JWT.
+
+    This function creates a signed JWT token and exchanges it for an access token
+    from Google's OAuth 2.0 endpoint. The access token is required for making
+    authenticated requests to the Google Calendar API.
+
+    Returns:
+        str: The obtained access token for accessing Google Calendar API.
+
+    Raises:
+        KeyError: If the response JSON does not contain the "access_token" key.
+    """
     signed_jwt = create_google_jwt_token()
 
     google_oauth_url = "https://oauth2.googleapis.com/token"
@@ -49,7 +75,26 @@ def fetch_google_calendar_access_token():
 
 def fetch_google_calendar_events(current_time: datetime, interval: int = 0) -> dict:
     """
-    google calendar 에 등록된 스케쥴을 가져옵니다.
+    Fetch events from a Google Calendar within a specific time interval.
+
+    This function retrieves a list of events available on a Google Calendar
+    for a given time period defined by the provided `current_time` and optional
+    `interval`. It constructs a request to the Google Calendar API to fetch events
+    that fall between the computed time boundaries.
+
+    Parameters:
+        current_time (datetime): The reference datetime used to calculate the
+                                 range of events to fetch.
+        interval (int, optional): The number of days to adjust the time range
+                                  relative to `current_time`. Defaults to 0. A
+                                  positive value fetches events for a future
+                                  day, and a negative value fetches events for
+                                  a past day.
+
+    Returns:
+        dict: The JSON response from the Google Calendar API containing calendar
+              events. The structure includes event details such as title, time,
+              and location, depending on the calendar configuration.
     """
     if interval < 0:
         start_time = (current_time + timedelta(days=interval)).replace(
