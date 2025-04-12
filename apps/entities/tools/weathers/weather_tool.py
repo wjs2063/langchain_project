@@ -11,7 +11,19 @@ load_dotenv()
 
 @tool
 def get_weather(location: str) -> str:
-    """주어진 위치의 현재 날씨 정보를 조회합니다."""
+    """
+    Provides functionality to retrieve and display the current weather information for a given location
+    by integrating with the OpenWeatherMap API.
+
+    The function leverages geocoding for resolving location names into geographic coordinates
+    and sends API requests to fetch weather data including temperature and weather descriptions.
+
+    Parameters:
+        location (str): The name of the location for which to fetch the weather information.
+
+    Returns:
+        str: A string describing the current weather and temperature in the specified location.
+    """
     # API 키 설정
     api_key = os.getenv("OPENWEATHERMAP_API_KEY")
 

@@ -15,7 +15,25 @@ load_dotenv()
 
 async def fetch_naver_search(query: str, display: int = 10) -> dict:
     """
-    NAVER 백과사전 검색을 통해서 해당 단어를 조회합니다.
+    Fetch data from Naver's open API for encyclopedia search.
+
+    This function is used to query Naver's search API for retrieving
+    encyclopedia search results. It sends an HTTP GET request with the
+    provided query and the optional display count. API credentials are
+    fetched from environment variables.
+
+    Arguments:
+        query: str
+            The search query keyword to fetch results for.
+        display: int, optional
+            Number of search results to display. Defaults to 10.
+
+    Returns:
+        dict
+            The HTTP response body parsed as a string.
+
+    Raises:
+        No documented raised exceptions.
     """
     url = f"https://openapi.naver.com/v1/search/encyc.json"
     client_id = os.getenv("NAVER_SEARCH_CLIENT_ID")
@@ -40,4 +58,4 @@ async def fetch_naver_search(query: str, display: int = 10) -> dict:
 
 
 # 비동기 함수 실행
-asyncio.run(fetch_naver_search(query="겨울", display=5))
+# asyncio.run(fetch_naver_search(query="겨울", display=5))
