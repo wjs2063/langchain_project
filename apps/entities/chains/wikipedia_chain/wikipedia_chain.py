@@ -1,13 +1,9 @@
 from langchain_community.retrievers import WikipediaRetriever
 from langchain_core.runnables import (
     RunnablePassthrough,
-    RunnablePassthrough,
-    RunnableParallel,
 )
 from apps.entities.chains.wikipedia_chain.prompt import prompt
 from apps.entities.chat_models.chat_models import base_chat
-import asyncio
-from langchain_core.output_parsers import StrOutputParser
 
 wiki_retriever = WikipediaRetriever(lang="en", doc_content_chars_max=500)
 

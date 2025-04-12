@@ -11,7 +11,7 @@ from entities.chains.domain_selector_chain.domain_selector_chain import (
 from apps.entities.utils.time import get_current_time
 import asyncio
 from apps.exceptions.exception_handler import CustomException
-from apps.services.chat_service import BaseChain
+from apps.services.chat_service import AbstractProcessingChain
 from infras.repository.user_repository.model import User, User_Pydantic
 from infras.repository.user_repository.schema import UserSchema
 from apps.entities.memories.history import SlidingWindowBufferRedisChatMessageHistory
@@ -176,7 +176,9 @@ class ChatService:
 
     def get_sub_chains(self, data):
         return [
-            sub for sub in BaseChain.__subclasses__() if sub.meets_condition(data=data)
+            sub
+            for sub in AbstractProcessingChain.__subclasses__()
+            if sub.meets_condition(data=data)
         ]
 
 
