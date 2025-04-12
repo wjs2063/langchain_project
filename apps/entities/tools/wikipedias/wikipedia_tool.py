@@ -16,7 +16,19 @@ api_wrapper = WikipediaAPIWrapper(
 
 
 class WikiInputs(BaseModel):
-    """Inputs to the wikipedia tool."""
+    """
+    Represents the input model for a query to look up in Wikipedia.
+
+    This class is used to structure and validate the input data required
+    to perform a search or query operation using Wikipedia. The class
+    takes a single input field, which is expected to be a complete sentence
+    used for querying. It inherits from BaseModel to leverage data
+    validation and parsing features.
+
+    Attributes:
+        query: A string containing the query to look up in Wikipedia.
+               It should be a full sentence.
+    """
 
     query: str = Field(
         description="query to look up in Wikipedia, should be full sentence"
