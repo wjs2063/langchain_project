@@ -1,5 +1,6 @@
 # country_server.py
 from mcp.server.fastmcp import FastMCP
+import mcp.types as types
 
 # 간단한 "국가-수도" 데이터베이스 (딕셔너리)
 capitals = {
@@ -25,6 +26,28 @@ def list_countries() -> list[str]:
 def get_capital(country: str) -> str:
     """주어진 국가의 수도 이름을 반환"""
     return capitals.get(country, "Unknown")
+
+
+@mcp.prompt()
+async def handle_get_prompt(
+    name: str, arguments: dict[str, str] | None
+) -> types.GetPromptResult:
+    """
+    사용가능한 모든 prompt를 반환
+    """
+    return [
+        types.GetPromptResult(
+            description="Country Prompt Template",
+            messages=[
+                types.PromptMessage(
+                    role="Assistant",
+                    content=types.TextContent(
+                        type="text", text="You are a Country Professional Agent"
+                    ),
+                )
+            ],
+        )
+    ]
 
 
 # 서버 실행

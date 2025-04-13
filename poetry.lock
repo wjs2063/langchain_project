@@ -2509,6 +2509,22 @@ groq = ">=0.4.1,<1"
 langchain-core = ">=0.3.42,<1.0.0"
 
 [[package]]
+name = "langchain-mcp-adapters"
+version = "0.0.7"
+description = "Make Anthropic Model Context Protocol (MCP) tools compatible with LangChain and LangGraph agents."
+category = "main"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "langchain_mcp_adapters-0.0.7-py3-none-any.whl", hash = "sha256:1e37ec79fc6afb58d1dea17733e08cc111ebc1992aed4b22c67de5e2bdcdb5c6"},
+    {file = "langchain_mcp_adapters-0.0.7.tar.gz", hash = "sha256:00cae7c832c1cf9e1faa8ed87973af2aa19d411aaf942860de680bec0f659fed"},
+]
+
+[package.dependencies]
+langchain-core = ">=0.3.36,<0.4"
+mcp = ">=1.4.1,<1.7"
+
+[[package]]
 name = "langchain-milvus"
 version = "0.1.8"
 description = "An integration package connecting Milvus and LangChain"
@@ -6711,4 +6727,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "beb27e7c19404861199d66cf5b9cbb4ce4ee5d438ebf86058ce84ccc84b31007"
+content-hash = "d29c748ade8575a29063f30c9aa76128b523bf9eb7c2c975151cc6e1d0079b5b"
