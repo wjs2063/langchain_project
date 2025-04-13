@@ -38,6 +38,22 @@ search_chain = (
 
 
 async def call_chain():
+    """
+    An asynchronous function that invokes a predefined chain using a provided input
+    dictionary and returns the processed result.
+
+    Attributes:
+        None
+
+    Args:
+        None
+
+    Returns:
+        Any: The result obtained after invoking the predefined chain.
+
+    Raises:
+        None
+    """
     result = await search_chain.ainvoke({"question": "이순신"})
     print(result)
     return result

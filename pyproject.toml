@@ -46,6 +46,7 @@ google-auth-httplib2 = "^0.2.0"
 google-auth-oauthlib = "^1.2.1"
 langchain-groq = "^0.2.5"
 fastapi-mcp = "^0.1.4"
+mcp = {extras = ["cli"], version = "^1.6.0"}
 
 
 [tool.poetry.group.dev.dependencies]
