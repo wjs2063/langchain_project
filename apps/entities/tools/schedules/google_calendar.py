@@ -137,28 +137,29 @@ def fetch_google_calendar_events(current_time: datetime, interval: int = 0) -> d
     return response.json()
 
 
-def insert_google_calendar_events(
+def add_google_calendar_events(
     summary: str, description: str, requested_start_time: datetime, interval: int = 30
 ) -> dict:
     """
-    Inserts an event into the user's Google Calendar with the provided details.
+    Adds a new event to the user's Google Calendar based on the provided inputs. The function
+    uses an access token and the Google Calendar API to send a request to create this event.
 
-    This function facilitates the creation of a Google Calendar event. It converts
-    the provided start time into the required format, calculates the end time
-    based on a specified interval, and makes a POST request to the Google Calendar
-    API. The event is created in the user's calendar, and the API's response is
-    returned. The function requires that the access token and calendar ID are
-    provided through environment variables or fetched directly.
+    Parameters
+    ----------
+    summary : str
+        The title of the event that will appear in the calendar.
+    description : str
+        Additional information about the event.
+    requested_start_time : datetime
+        The starting time of the event.
+    interval : int, optional
+        The duration of the event in minutes (default is 30).
 
-    Args:
-        summary (str): Title of the event to be added.
-        description (str): Detailed description of the event.
-        requested_start_time (datetime): The start time of the event in datetime format.
-        interval (int): Duration of the event in minutes. Defaults to 30 minutes.
-
-    Returns:
-        dict: Response from the Google Calendar API containing event details, status,
-        or errors if any occur.
+    Returns
+    -------
+    dict
+        A dictionary containing the JSON response from the Google Calendar API, which
+        includes details of the created event.
     """
     access_token = fetch_google_calendar_access_token()
     calendar_id = os.getenv("MY_GOOGLE_CALENDAR_USER_ID")
@@ -183,6 +184,6 @@ def insert_google_calendar_events(
     return response.json()
 
 
-time_zone = pytz.timezone("Asia/Seoul")
-current_time = datetime.now(time_zone)
+# time_zone = pytz.timezone("Asia/Seoul")
+# current_time = datetime.now(time_zone)
 # print(insert_google_calendar_events(current_time))
