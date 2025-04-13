@@ -1,5 +1,8 @@
 from langchain_core.tools import Tool, tool
-from apps.entities.tools.schedules.google_calendar import fetch_google_calendar_events
+from apps.entities.tools.schedules.google_calendar import (
+    fetch_google_calendar_events,
+    insert_google_calendar_events,
+)
 from datetime import datetime, timezone
 import pytz
 
@@ -22,6 +25,41 @@ def fetch_my_schedule(interval: int = 1):
     time_zone = pytz.timezone("Asia/Seoul")
     current_time = datetime.now(time_zone)
     return fetch_google_calendar_events(current_time=current_time, interval=interval)
+
+
+@tool
+def add_my_schedule(
+    summary: str, description: str, requested_start_time: datetime, interval: int = 30
+):
+    """
+    Adds an event to a Google Calendar.
+
+    This function schedules a new event on a Google Calendar. It utilizes the
+    `insert_google_calendar_events` function to handle the actual insertion of
+    events into the calendar. The event consists of a summary, description,
+    start time, and a default interval duration.
+
+    Arguments:
+        summary: str
+            The title or summary of the event.
+        description: str
+            Additional details or description of the event.
+        requested_start_time: datetime
+            The desired start time for the event.
+        interval: int, optional
+            The duration of the event in minutes. Defaults to 30.
+
+    Returns:
+        Depends on the return of `insert_google_calendar_events`. Typically,
+        returns a representation of the created event, or confirmation of
+        successful addition.
+    """
+    return insert_google_calendar_events(
+        summary=summary,
+        description=description,
+        requested_start_time=requested_start_time,
+        interval=30,
+    )
 
 
 # time_zone = pytz.timezone("Asia/Seoul")

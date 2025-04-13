@@ -51,13 +51,13 @@ runnable_chain = RunnableParallel(
     ),
 )
 
-response = runnable_chain.invoke(
-    {"korea_input": "한국", "english_input": "about korea"}
-)
+# response = runnable_chain.invoke(
+#     {"korea_input": "한국", "english_input": "about korea"}
+# )
 
-print(response["wikipedia_korea_result"])
-print(response["wikipedia_english_result"])
-
-runnable = {"question": lambda x: x["question"] + "convert"} | RunnablePassthrough()
-
-print(runnable.invoke({"question": "hello"}))
+# print(response["wikipedia_korea_result"])
+# print(response["wikipedia_english_result"])
+#
+# runnable = {"question": lambda x: x["question"] + "convert"} | RunnablePassthrough()
+#
+# print(runnable.invoke({"question": "hello"}))

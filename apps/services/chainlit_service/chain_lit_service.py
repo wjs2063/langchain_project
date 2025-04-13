@@ -174,7 +174,7 @@ class ChatService:
         else:
             return await asyncio.gather(*parallel_tasks)
 
-    def get_sub_chains(self, data):
+    def get_sub_chains(self, data: dict):
         return [
             sub
             for sub in AbstractProcessingChain.__subclasses__()
