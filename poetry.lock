@@ -2943,8 +2943,10 @@ httpx = ">=0.27"
 httpx-sse = ">=0.4"
 pydantic = ">=2.7.2,<3.0.0"
 pydantic-settings = ">=2.5.2"
+python-dotenv = {version = ">=1.0.0", optional = true, markers = "extra == \"cli\""}
 sse-starlette = ">=1.6.1"
 starlette = ">=0.27"
+typer = {version = ">=0.12.4", optional = true, markers = "extra == \"cli\""}
 uvicorn = ">=0.23.1"
 
 [package.extras]
@@ -6709,4 +6711,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "a4f0de6737214adce0b79a495c2c0fc9a8347d64674c9c2c0def0ca0cced8834"
+content-hash = "beb27e7c19404861199d66cf5b9cbb4ce4ee5d438ebf86058ce84ccc84b31007"

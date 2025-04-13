@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator, field_validator
 from langchain_core.messages import AIMessage
 
 
