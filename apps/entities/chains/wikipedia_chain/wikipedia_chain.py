@@ -39,6 +39,6 @@ wikipedia_chain = (
     #    | StrOutputParser()
 )
 
-print(wikipedia_chain.invoke("tokyo"))
+# print(wikipedia_chain.invoke("tokyo"))
 # asyncio.run(run_chain(ko_retriever, en_retriever, text="문재인"))
 # RunnableParallel

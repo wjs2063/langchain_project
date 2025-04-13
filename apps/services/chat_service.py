@@ -31,7 +31,7 @@ class AbstractProcessingChain(ABC):
 
     def __init__(self, client_information: dict):
         self.client_information = client_information
-        self.chain: RunnableSequence
+        self.chain: RunnableSequence | None = None
 
     @classmethod
     def parse_response(cls, response):
