@@ -93,4 +93,4 @@ wikipedia_retrieval = WikipediaRetriever(
     top_k_results=1,
 )
 
-print(wikipedia_retrieval.invoke("이재용이누구야?"))
+# print(wikipedia_retrieval.invoke("이재용이누구야?"))
