@@ -17,12 +17,13 @@ schedule_agent = AgentExecutor(
     max_iterations=6,
     max_execution_time=8,
     handle_parsing_errors=True,
+    early_stopping_method="force",
 )
-import pytz
-from datetime import datetime, timezone
-
-time_zone = pytz.timezone("Asia/Seoul")
-current_time = datetime.now(time_zone)
+# import pytz
+# from datetime import datetime, timezone
+#
+# time_zone = pytz.timezone("Asia/Seoul")
+# current_time = datetime.now(time_zone)
 
 # print(
 #     schedule_agent.invoke(
