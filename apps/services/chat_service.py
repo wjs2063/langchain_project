@@ -4,7 +4,13 @@ from langchain_core.runnables import RunnableSequence
 
 from apps.services.schema import ChainResponse
 from apps.entities.chains.weather_chain.weather_chain import weather_agent
-from apps.entities.chains.schedule_chain.chain import schedule_agent
+from apps.entities.chains.schedule_chain.chain import (
+    schedule_command_select_chain,
+    schedule_response_chain,
+)
+from apps.entities.chains.schedule_chain.executors import AbstractCommandExecutor
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from apps.entities.chains.general_chat_chain.general_chain import general_chain
 from langchain.chains.base import Chain
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
@@ -119,10 +125,9 @@ class ScheduleChain(AbstractProcessingChain):
     def __init__(
         self,
         client_information: dict,
-        schedule_chain=schedule_agent,
     ):
         super().__init__(client_information)
-        self.chain = schedule_chain
+        self.schedule_command_select_chain = schedule_command_select_chain
 
     @staticmethod
     def meets_condition(data: dict) -> bool:
@@ -130,11 +135,26 @@ class ScheduleChain(AbstractProcessingChain):
 
     async def arun(self, request_information: dict) -> ChainResponse:
         request_information = request_information.copy()
-        response = await self.chain.ainvoke(
+        schedule_command_response = await self.schedule_command_select_chain.ainvoke(
             {
-                "question": request_information["question"],
                 "chat_history": request_information["chat_history"],
-                "user_info": request_information["user_info"],
+                "question": request_information["question"],
+                "current_datetime": datetime.now(ZoneInfo("Asia/Seoul")).isoformat(),
+            }
+        )
+        command_type = None
+        # TODO : schedule_command_response 에 매칭되는 class 를 가져와서 command 실행
+        for CommandExecutor in AbstractCommandExecutor.__subclasses__():
+            if CommandExecutor.meets_condition(schedule_command_response):
+                response = await CommandExecutor(
+                    schedule_command_response=schedule_command_response
+                ).aexecute()
+
+        response = await schedule_response_chain.ainvoke(
+            {
+                "command_result": response,
+                "command_type": schedule_command_response,
+                "question": request_information["question"],
             }
         )
         output = ScheduleChain.parse_response(response)
