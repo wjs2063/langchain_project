@@ -26,7 +26,11 @@ apis -> service  -> entity | infra
 
 [시연영상]
 
-https://github.com/user-attachments/assets/021556b4-4e7e-4335-a384-f6e3f9ba681b
+
+
+
+https://github.com/user-attachments/assets/c1c945c3-02c0-4d92-a061-ed311fc390ba
+
 
 
 
