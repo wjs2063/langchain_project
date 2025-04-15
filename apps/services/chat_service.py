@@ -242,7 +242,6 @@ class WikipediaChain(AbstractProcessingChain):
 
     async def arun(self, request_information: dict) -> ChainResponse:
         request_information = request_information.copy()
-        print(request_information)
         response = await self.chain.ainvoke(
             {
                 "question": request_information["question"],
