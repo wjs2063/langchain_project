@@ -21,6 +21,11 @@ exception : 예외처리
 **비순환 구조** 
 apis -> service  -> entity | infra 
 
+## 서버 아키텍쳐
+
+![image](https://github.com/user-attachments/assets/2c427d15-1ee9-46c8-bc27-3924282b067b)
+
+
 
 ## Chain 동작 흐름 
 
