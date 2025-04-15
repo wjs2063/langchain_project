@@ -25,7 +25,7 @@ groq_deepseek = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
 )
 
-base_chat = ChatOpenAI(model="gpt-4o", temperature=0.5, verbose=True)
+base_chat = ChatOpenAI(model="gpt-4o", temperature=0.3, verbose=True)
 prompt = ChatPromptTemplate.from_messages(
     [
         (
