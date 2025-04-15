@@ -99,13 +99,15 @@ class ScheduleChain(AbstractProcessingChain):
     Represents a processing chain specifically used for scheduling-related tasks.
     """
 
+    SCHEDULE_DOMAIN = "schedule"
+
     def __init__(self, client_information: dict):
         super().__init__(client_information)
         self.schedule_command_select_chain = schedule_command_select_chain
 
     @staticmethod
     def meets_condition(input_data: dict) -> bool:
-        return input_data["domain"] == "schedule"
+        return input_data["domain"] == ScheduleChain.SCHEDULE_DOMAIN
 
     async def arun(self, request_information: dict) -> ChainResponse:
         # Create a copy to ensure original data isn't modified
@@ -187,6 +189,8 @@ class GeneralChain(AbstractProcessingChain):
         Synchronously invokes the chain and returns the processed AI message.
     """
 
+    GENERAL_DOMAIN = "general"
+
     def __init__(
         self,
         client_information: dict,
@@ -197,7 +201,7 @@ class GeneralChain(AbstractProcessingChain):
 
     @staticmethod
     def meets_condition(input_data: dict) -> bool:
-        return input_data["domain"] == "general"
+        return input_data["domain"] == GeneralChain.GENERAL_DOMAIN
 
     async def arun(self, request_information: dict) -> ChainResponse:
         request_information = request_information.copy()
@@ -226,16 +230,19 @@ class WikipediaChain(AbstractProcessingChain):
     based on the provided context such as chat history and user information.
     """
 
+    WIKIPEDIA_DOMAIN = "wikipedia"
+
     def __init__(self, client_information: dict):
         super().__init__(client_information)
         self.chain = wikipedia_chain
 
     @staticmethod
     def meets_condition(input_data: dict) -> bool:
-        return input_data["domain"] == "wikipedia"
+        return input_data["domain"] == WikipediaChain.WIKIPEDIA_DOMAIN
 
     async def arun(self, request_information: dict) -> ChainResponse:
         request_information = request_information.copy()
+        print(request_information)
         response = await self.chain.ainvoke(
             {
                 "question": request_information["question"],
@@ -247,3 +254,6 @@ class WikipediaChain(AbstractProcessingChain):
         return ChainResponse(
             input=request_information, output=AIMessage(content=output)
         )
+
+    def run(self):
+        pass

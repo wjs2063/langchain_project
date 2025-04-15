@@ -5,7 +5,7 @@ from langchain_core.runnables import (
 from apps.entities.chains.wikipedia_chain.prompt import prompt
 from apps.entities.chat_models.chat_models import base_chat
 
-wiki_retriever = WikipediaRetriever(lang="en", doc_content_chars_max=500)
+wiki_retriever = WikipediaRetriever(lang="ko", doc_content_chars_max=500)
 
 
 def format_docs(docs):
@@ -28,9 +28,13 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 
+from langchain_core.runnables import RunnableLambda
+
 wikipedia_chain = (
     {
-        "context": wiki_retriever | format_docs,
+        "context": RunnableLambda(lambda x: x["question"])
+        | wiki_retriever
+        | format_docs,
         "question": RunnablePassthrough(),
         "user_info": {},
     }
