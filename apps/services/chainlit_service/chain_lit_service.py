@@ -153,7 +153,7 @@ class ChatService:
             parallel_tasks = set()
 
             for data in result.get("questions", []):
-                for sub_chain in self.get_sub_chains(data):
+                for sub_chain in self.get_sub_chains(input_data=data):
                     task = asyncio.create_task(
                         sub_chain(
                             client_information={},
@@ -174,11 +174,11 @@ class ChatService:
         else:
             return await asyncio.gather(*parallel_tasks)
 
-    def get_sub_chains(self, data: dict):
+    def get_sub_chains(self, input_data: dict):
         return [
             sub
             for sub in AbstractProcessingChain.__subclasses__()
-            if sub.meets_condition(data=data)
+            if sub.meets_condition(input_data=input_data)
         ]
 
 

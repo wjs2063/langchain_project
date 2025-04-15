@@ -19,20 +19,9 @@ from apps.entities.chains.wikipedia_chain.wikipedia_chain import wikipedia_chain
 
 class AbstractProcessingChain(ABC):
     """
-    AbstractProcessingChain serves as a blueprint for creating processing chains
-    based on specific client information. It defines the structure and required
-    methods to be implemented by subclasses, ensuring compatibility and extending functionality.
-
-    This abstract base class is designed to work with processing chains that execute specific
-    operations asynchronously or synchronously, validate input data based on conditions, and
-    parse various types of responses. Subclasses must override the abstract methods to provide
-    their own implementation details.
-
-    Attributes:
-        client_information (dict): A dictionary containing client-specific details that influence
-        the behavior of the processing chain.
-        chain (RunnableSequence): Represents the processing chain. Must be initialized later
-        in subclasses.
+    Abstract base class for creating processing chains with operations that
+    validate data, process chains, and parse responses. Subclasses must implement
+    abstract methods to provide specific functionality.
     """
 
     def __init__(self, client_information: dict):
@@ -40,130 +29,131 @@ class AbstractProcessingChain(ABC):
         self.chain: RunnableSequence | None = None
 
     @classmethod
-    def parse_response(cls, response):
-        if isinstance(response, str):
-            output = response
-        elif isinstance(response, AIMessage):
-            output = response.content
-        elif isinstance(response, dict):
-            output = response["output"]
-        else:
-            raise ValueError("Invalid response")
-        return output
+    def parse_response(cls, response) -> str:
+        """Parses various types of responses into a string."""
+        response_mapping = {
+            str: lambda r: r,
+            AIMessage: lambda r: r.content,
+            dict: lambda r: r.get("output"),
+        }
+        response_type = type(response)
+        if response_type in response_mapping:
+            return response_mapping[response_type](response)
+        raise ValueError(f"Invalid response type: {response_type}")
 
     @staticmethod
     @abstractmethod
-    def meets_condition(data: dict) -> bool:
+    def meets_condition(input_data: dict) -> bool:
+        """Checks if the processing chain applies to the given input data."""
         raise NotImplementedError
 
     @abstractmethod
-    async def arun(self, request_information) -> dict:
+    async def arun(self, request_information: dict) -> dict:
+        """Asynchronously processes the request and returns a response."""
         raise NotImplementedError
 
     @abstractmethod
     def run(self) -> AIMessage:
+        """Synchronously processes the request and returns an AIMessage."""
         raise NotImplementedError
 
 
 class WeatherChain(AbstractProcessingChain):
     """
-    A class representing a processing chain for weather-related queries.
-
-    This class extends the AbstractProcessingChain and is intended to handle queries
-    related to weather information. It processes input data and interacts with
-    a weather agent to retrieve and deliver weather-related responses. The chain
-    ensures that it operates under the correct domain ("weather") and provides
-    asynchronous functionality to handle real-time or asynchronous data processing.
+    Processing chain for handling weather-related queries. Validates input data
+    based on the 'weather' domain and interacts with the weather agent to obtain results.
     """
+
+    WEATHER_DOMAIN = "weather"  # Extracted constant for domain check
 
     def __init__(self, client_information: dict, weather_chain=weather_agent):
         super().__init__(client_information)
         self.chain = weather_chain
 
     @staticmethod
-    def meets_condition(data) -> bool:
-        return data["domain"] == "weather"
+    def meets_condition(input_data: dict) -> bool:
+        """Checks if the input data belongs to the weather domain."""
+        return input_data.get("domain") == WeatherChain.WEATHER_DOMAIN
 
     async def arun(self, request_information: dict) -> ChainResponse:
-        """
-        weather chain's input requirements
-        question : str
-        """
-        request_information = request_information.copy()
-        response = await self.chain.ainvoke(
-            {
-                "question": request_information["question"],
-                "chat_history": request_information["chat_history"],
-                "user_info": request_information["user_info"],
-            }
-        )
-        output = WeatherChain.parse_response(response)
-        # TODO : Call weather chain
+        """Processes the request asynchronously and returns the chain response."""
+        request_information = request_information.copy()  # Avoid mutating input
+        agent_input = {
+            "question": request_information["question"],
+            "chat_history": request_information.get("chat_history", []),
+            "user_info": request_information.get("user_info", {}),
+        }
+        raw_response = await self.chain.ainvoke(agent_input)
+        parsed_output = self.parse_response(raw_response)
         return ChainResponse(
-            input=request_information, output=AIMessage(content=output)
+            input=request_information, output=AIMessage(content=parsed_output)
         )
 
     def run(self) -> AIMessage:
-        return AIMessage()
+        """Synchronously processes the request."""
+        return AIMessage()  # Placeholder for synchronous operation
 
 
 class ScheduleChain(AbstractProcessingChain):
     """
     Represents a processing chain specifically used for scheduling-related tasks.
-
-    The ScheduleChain is an extension of the AbstractProcessingChain and is
-    used to manage and execute operations associated with the "schedule"
-    domain. It contains functionality to determine its applicability based on
-    input data and processes requests using an underlying chain dedicated to
-    scheduling.
-
-    Attributes:
-        chain: The processing chain responsible for handling scheduling tasks.
-
     """
 
-    def __init__(
-        self,
-        client_information: dict,
-    ):
+    def __init__(self, client_information: dict):
         super().__init__(client_information)
         self.schedule_command_select_chain = schedule_command_select_chain
 
     @staticmethod
-    def meets_condition(data: dict) -> bool:
-        return data["domain"] == "schedule"
+    def meets_condition(input_data: dict) -> bool:
+        return input_data["domain"] == "schedule"
 
     async def arun(self, request_information: dict) -> ChainResponse:
+        # Create a copy to ensure original data isn't modified
         request_information = request_information.copy()
-        schedule_command_response = await self.schedule_command_select_chain.ainvoke(
+
+        # Extract and pass the current date-time as a variable for clarity
+        current_datetime = datetime.now(ZoneInfo("Asia/Seoul")).isoformat()
+
+        # Invoke schedule command select chain
+        command_response = await self.schedule_command_select_chain.ainvoke(
             {
                 "chat_history": request_information["chat_history"],
                 "question": request_information["question"],
-                "current_datetime": datetime.now(ZoneInfo("Asia/Seoul")).isoformat(),
+                "current_datetime": current_datetime,
             }
         )
-        command_type = None
-        # TODO : schedule_command_response 에 매칭되는 class 를 가져와서 command 실행
-        for CommandExecutor in AbstractCommandExecutor.__subclasses__():
-            if CommandExecutor.meets_condition(schedule_command_response):
-                response = await CommandExecutor(
-                    schedule_command_response=schedule_command_response
-                ).aexecute()
 
-        response = await schedule_response_chain.ainvoke(
+        # Find the matching command executor and execute it
+        command_result = await self.find_and_execute_command(command_response)
+
+        # Prepare final response by invoking the scheduling response chain
+        final_response = await schedule_response_chain.ainvoke(
             {
-                "command_result": response,
-                "command_type": schedule_command_response,
+                "command_result": command_result,
+                "command_type": command_response,
                 "question": request_information["question"],
             }
         )
-        output = ScheduleChain.parse_response(response)
+
+        # Parse and return the final output as a ChainResponse
+        parsed_output = ScheduleChain.parse_response(final_response)
         return ChainResponse(
-            input=request_information, output=AIMessage(content=output)
+            input=request_information, output=AIMessage(content=parsed_output)
         )
 
-    def run(self) -> AIMessage:
-        return AIMessage()
+    async def find_and_execute_command(self, command_response: dict) -> dict:
+        """
+        Finds and executes the matching command executor for the given response.
+        """
+        for CommandExecutor in AbstractCommandExecutor.__subclasses__():
+            if CommandExecutor.meets_condition(command_response):
+                return await CommandExecutor(
+                    schedule_command_response=command_response
+                ).aexecute()
+        raise ValueError("No matching CommandExecutor found.")
+
+    def run(self):
+        pass
 
 
 class GeneralChain(AbstractProcessingChain):
@@ -206,8 +196,8 @@ class GeneralChain(AbstractProcessingChain):
         self.chain = general_chain
 
     @staticmethod
-    def meets_condition(data: dict) -> bool:
-        return data["domain"] == "general"
+    def meets_condition(input_data: dict) -> bool:
+        return input_data["domain"] == "general"
 
     async def arun(self, request_information: dict) -> ChainResponse:
         request_information = request_information.copy()
@@ -241,8 +231,8 @@ class WikipediaChain(AbstractProcessingChain):
         self.chain = wikipedia_chain
 
     @staticmethod
-    def meets_condition(data: dict) -> bool:
-        return data["domain"] == "wikipedia"
+    def meets_condition(input_data: dict) -> bool:
+        return input_data["domain"] == "wikipedia"
 
     async def arun(self, request_information: dict) -> ChainResponse:
         request_information = request_information.copy()
