@@ -8,6 +8,12 @@ from apps.entities.chains.search_chain.prompt import search_prompt
 from apps.entities.chat_models.chat_models import base_chat
 from apps.entities.tools.search.naver.encyclopedia import naver_search_runnable
 import asyncio
+from langchain_community.retrievers import WikipediaRetriever
+from langchain_core.runnables import (
+    RunnablePassthrough,
+)
+
+wiki_retriever = WikipediaRetriever(lang="ko", doc_content_chars_max=500)
 
 flatten = RunnableLambda(
     lambda d: {
@@ -16,11 +22,19 @@ flatten = RunnableLambda(
     }
 )
 
+
+async def run_wikipedia(x):
+    return await wiki_retriever.ainvoke(x["question"])
+
+
+wikipedia_runnable = RunnableLambda(run_wikipedia)
+
 search_chain = (
     {
         "search_results": RunnableParallel(
             {
                 "naver_serach_result": naver_search_runnable,
+                "wikipedia_search_result": wikipedia_runnable,
             }
         ),
         "passthrough": RunnablePassthrough(),
