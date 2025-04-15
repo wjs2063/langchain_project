@@ -22,6 +22,11 @@ exception : 예외처리
 apis -> service  -> entity | infra 
 
 
+## Chain 동작 흐름 
+
+![image](https://github.com/user-attachments/assets/a33cb157-15ec-4f0a-84ff-3eeb2a281033)
+
+
 
 
 [시연영상]
