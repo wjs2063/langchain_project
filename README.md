@@ -56,3 +56,32 @@ poetry install
 uvicorn main:app --host=0.0.0.0 --port=8000
 ```
 
+
+
+
+# Feature
+
+- 매번 로그를 찍는 과정이 코드레벨에서 품질이 저하되므로 데코레이터로 제작  
+- required : ``` pip install python-json-logger ```
+- source : ```apps/infras/utils/loggings/decorator.py```
+
+### Explanation
+- before = True -> input 기록
+- after = True -> output 기록 
+- class & func name 기록 
+
+
+log trace example 
+```
+
+@trace(logger=logger,before=True,after=True)
+async def ainvoke(self, message: str):
+    request_information = {
+        "question": message,
+        "ability": "chatting",
+        "chat_history": history,
+        "user_info": get_current_time(region="kr"),
+    }
+    return request_information
+   
+```
