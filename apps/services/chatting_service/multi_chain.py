@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from langchain_core.runnables import RunnableSequence
 
-from apps.services.schema import ChainResponse
+from services.chatting_service.schema import ChainResponse
 from apps.entities.chains.weather_chain.weather_chain import weather_agent
 from apps.entities.chains.schedule_chain.chain import (
     schedule_command_select_chain,
@@ -12,8 +12,7 @@ from apps.entities.chains.schedule_chain.executors import AbstractCommandExecuto
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from apps.entities.chains.general_chat_chain.general_chain import general_chain
-from langchain.chains.base import Chain
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.messages import AIMessage
 from apps.entities.chains.wikipedia_chain.wikipedia_chain import wikipedia_chain
 
 
@@ -75,6 +74,7 @@ class WeatherChain(AbstractProcessingChain):
         """Checks if the input data belongs to the weather domain."""
         return input_data.get("domain") == WeatherChain.WEATHER_DOMAIN
 
+    # @trace(logger=logger)
     async def arun(self, request_information: dict) -> ChainResponse:
         """Processes the request asynchronously and returns the chain response."""
         request_information = request_information.copy()  # Avoid mutating input
@@ -109,6 +109,7 @@ class ScheduleChain(AbstractProcessingChain):
     def meets_condition(input_data: dict) -> bool:
         return input_data["domain"] == ScheduleChain.SCHEDULE_DOMAIN
 
+    # @trace(logger=logger)
     async def arun(self, request_information: dict) -> ChainResponse:
         # Create a copy to ensure original data isn't modified
         request_information = request_information.copy()
@@ -143,6 +144,7 @@ class ScheduleChain(AbstractProcessingChain):
             input=request_information, output=AIMessage(content=parsed_output)
         )
 
+    # @trace(logger=logger)
     async def find_and_execute_command(self, command_response: dict) -> dict:
         """
         Finds and executes the matching command executor for the given response.
@@ -203,6 +205,7 @@ class GeneralChain(AbstractProcessingChain):
     def meets_condition(input_data: dict) -> bool:
         return input_data["domain"] == GeneralChain.GENERAL_DOMAIN
 
+    # @trace(logger=logger)
     async def arun(self, request_information: dict) -> ChainResponse:
         request_information = request_information.copy()
         response = await self.chain.ainvoke(
@@ -240,6 +243,7 @@ class WikipediaChain(AbstractProcessingChain):
     def meets_condition(input_data: dict) -> bool:
         return input_data["domain"] == WikipediaChain.WIKIPEDIA_DOMAIN
 
+    # @trace(logger=logger)
     async def arun(self, request_information: dict) -> ChainResponse:
         request_information = request_information.copy()
         response = await self.chain.ainvoke(

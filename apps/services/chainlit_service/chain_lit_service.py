@@ -11,8 +11,8 @@ from entities.chains.domain_selector_chain.domain_selector_chain import (
 from apps.entities.utils.time import get_current_time
 import asyncio
 from apps.exceptions.exception_handler import CustomException
-from apps.services.chat_service import AbstractProcessingChain
-from infras.repository.user_repository.model import User, User_Pydantic
+from services.chainlit_service.multi_chain import AbstractProcessingChain
+from infras.repository.user_repository.model import User_Pydantic
 from infras.repository.user_repository.schema import UserSchema
 from apps.entities.memories.history import SlidingWindowBufferRedisChatMessageHistory
 from apps.infras.redis._redis import _redis_url
@@ -30,6 +30,8 @@ from apps.entities.chat_models.chat_models import (
 from apps.entities.chains.merge_output_chain.merge_output_chain import (
     merge_output_chain,
 )
+from apps.infras.utils.loggings.root import logger
+from apps.infras.utils.loggings.decorator import trace
 
 """
 1. 질문 분해 (ex. 날씨도 알려주고, 노래도 틀어줘)
@@ -122,6 +124,7 @@ class ChatService:
             await cl.Message(msg).send()
         await cl.Message("-" * 10 + "이전 대화 이력" + "-" * 10).send()
 
+    @trace(logger=logger)
     async def ainvoke(self, message: Message):
         # 첫 질문을 -> 소규모 질문으로 분할
         history = await self.history.aget_messages()

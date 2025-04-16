@@ -48,6 +48,7 @@ langchain-groq = "^0.2.5"
 fastapi-mcp = "^0.1.4"
 mcp = {extras = ["cli"], version = "^1.6.0"}
 langchain-mcp-adapters = "^0.0.7"
+python-json-logger = "^3.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
