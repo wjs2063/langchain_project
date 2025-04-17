@@ -11,11 +11,14 @@ def log_handler(log_data: dict):
     request_body = log_data.get("request", {}).get("body", {})
     # request_query_params = log_data.get("request", {}).get("param", {})
     # request_path_params = log_data.get("request", {}).get("path_params", {})
-    # response_body = log_data.get("response", {}).get("body", {})
+    response_body = log_data.get("response", {}).get("body", {})
     log_data = {
-        "headers": request_headers,
-        "session_id": request_body.get("session_id", "not found"),
-        "question": request_body.get("question", "not found"),
+        "request_info": {
+            "headers": request_headers,
+            "session_id": request_body.get("session_id", "not found"),
+            "question": request_body.get("question", "not found"),
+        },
+        "response_info": response_body,
     }
     logger.info(log_data)
 
