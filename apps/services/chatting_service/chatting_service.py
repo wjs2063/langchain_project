@@ -20,7 +20,7 @@ from apps.entities.chains.merge_output_chain.merge_output_chain import (
     merge_output_chain,
 )
 from apps.infras.utils.loggings.root import logger
-from apps.infras.utils.loggings.decorator import trace
+from apps.infras.utils.loggings.usecase import trace
 
 
 class ChatService:
@@ -78,7 +78,7 @@ class ChatService:
             session_id=session_id, url=_redis_url, buffer_size=8
         )
 
-    @trace(logger=logger)
+    # @trace(logger=logger)
     async def ainvoke(self, message: str):
         # 첫 질문을 -> 소규모 질문으로 분할
         history = await self.history.aget_messages()

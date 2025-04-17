@@ -1,7 +1,5 @@
-from functools import wraps
-import logging
 import inspect
-
+from functools import wraps
 
 # def trace(logger, before=True, after=True):
 #     if not logger:
@@ -57,10 +55,6 @@ import inspect
 #     return decorator
 
 
-import inspect
-from functools import wraps
-
-
 def trace(logger, before=True, after=True):
     if not logger:
         raise ValueError("logger is required")
@@ -85,18 +79,12 @@ def trace(logger, before=True, after=True):
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 name = get_qualified_name(args)
-                try:
-                    if before:
-                        logger.info(msg=name, extra={"input": str(kwargs)})
-                    result = await func(*args, **kwargs)
-                    if after:
-                        logger.info(msg=name, extra={"output": str(result)})
-                    return result
-                except Exception:
-                    logger.exception(
-                        msg=f"{name} raised an exception", extra={"input": str(kwargs)}
-                    )
-                    raise
+                if before:
+                    logger.info(msg=name, extra={"input": kwargs})
+                result = await func(*args, **kwargs)
+                if after:
+                    logger.info(msg=name, extra={"output": str(result)})
+                return result
 
             return async_wrapper
         else:
@@ -104,18 +92,12 @@ def trace(logger, before=True, after=True):
             @wraps(func)
             def sync_wrapper(*args, **kwargs):
                 name = get_qualified_name(args)
-                try:
-                    if before:
-                        logger.info(msg=name, extra={"input": str(kwargs)})
-                    result = func(*args, **kwargs)
-                    if after:
-                        logger.info(msg=name, extra={"output": str(result)})
-                    return result
-                except Exception:
-                    logger.exception(
-                        msg=f"{name} raised an exception", extra={"input": str(kwargs)}
-                    )
-                    raise
+                if before:
+                    logger.info(msg=name, extra={"input": kwargs})
+                result = func(*args, **kwargs)
+                if after:
+                    logger.info(msg=name, extra={"output": str(result)})
+                return result
 
             return sync_wrapper
 

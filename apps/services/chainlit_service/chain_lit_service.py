@@ -31,7 +31,7 @@ from apps.entities.chains.merge_output_chain.merge_output_chain import (
     merge_output_chain,
 )
 from apps.infras.utils.loggings.root import logger
-from apps.infras.utils.loggings.decorator import trace
+from apps.infras.utils.loggings.usecase import trace
 
 """
 1. 질문 분해 (ex. 날씨도 알려주고, 노래도 틀어줘)
