@@ -13,12 +13,15 @@ from apps.services.chatting_service.chatting_service import ChatService
 from apps.infras.utils.loggings.usecase import trace
 from apps.infras.utils.loggings.root import logger
 from apps.core.routers.log_routes.log_routes import LogRoute
+from infras.utils.decorators.exceptions.exception_handler import (
+    register_exception_handler,
+)
 
 chat_router = APIRouter(route_class=LogRoute)
 
 
 @chat_router.post("/")
-# @trace(logger=logger)
+@register_exception_handler
 async def chat_handler(
     client_information: ClientInformation,
 ):
@@ -26,7 +29,6 @@ async def chat_handler(
     history = SlidingWindowBufferRedisChatMessageHistory(
         session_id=client_information.session_id, url=_redis_url, buffer_size=8
     )
-
     chat_service = ChatService(
         user_repository=UserRepository(),
         chat_model=multi_domain_chain,

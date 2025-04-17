@@ -63,18 +63,14 @@ def merge_multi_domain_output(datas: list) -> AIMessage:
         AIMessage: An AIMessage object containing the combined
         domain-specific question-answer pairs as its content.
     """
-    try:
-        answer = []
-        for data in datas:
-            # if isinstance(data, AIMessage):
-            #     data = data.content
-            data = data.model_dump()
-            partial_qa_pair = f"""{data["input"]['domain']} question : {data["input"]["question"]}\n output : {data["output"]}"""
-            answer.append(partial_qa_pair)
-    except Exception as e:
-        print(e)
-    else:
-        return AIMessage(content="\n".join(answer))
+    answer = []
+    for data in datas:
+        # if isinstance(data, AIMessage):
+        #     data = data.content
+        data = data.model_dump()
+        partial_qa_pair = f"""{data["input"]['domain']} question : {data["input"]["question"]}\n output : {data["output"]}"""
+        answer.append(partial_qa_pair)
+    return AIMessage(content="\n".join(answer))
 
 
 # print(multi_domain_chain.invoke({"question": "3일후 스케쥴과 오늘 날씨 알려줘"}))

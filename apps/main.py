@@ -1,7 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
-from apps.exceptions.exception_handler import CustomException, custom_exception_handler
+from apps.exceptions.exception_handler import CustomException
 from chainlit.utils import mount_chainlit
 from fastapi import FastAPI, Request
 from tortoise import Tortoise, generate_config, run_async
@@ -9,6 +9,12 @@ from tortoise.contrib.fastapi import RegisterTortoise, register_tortoise
 import time
 from apps.apis.api_routes import router
 from apps.infras.db.postgres import DB_CONFIG
+from apps.core.routers.log_routes.log_routes import LogRoute
+from exceptions.exception_handler import (
+    UndefinedException,
+    register_exception_handlers,
+)
+from fastapi.responses import JSONResponse
 
 
 @asynccontextmanager
@@ -54,6 +60,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="Langchain ChatBot Apps", lifespan=lifespan)
+register_exception_handlers(app=app)
 
 
 @app.middleware("http")
@@ -66,7 +73,6 @@ async def add_process_time_header(request: Request, call_next):
 
 
 app.include_router(router)
-app.add_exception_handler(CustomException, custom_exception_handler)
 
 
 @app.post("/")

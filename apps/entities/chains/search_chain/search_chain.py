@@ -69,7 +69,6 @@ async def call_chain():
         None
     """
     result = await search_chain.ainvoke({"question": "이순신"})
-    print(result)
     return result
 
 

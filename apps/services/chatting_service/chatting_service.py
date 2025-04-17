@@ -11,7 +11,6 @@ from apps.infras.redis._redis import _redis_url
 from infras.repository.user_repository.user_repository import (
     AbstractUserRepository,
 )
-
 from langchain_core.messages import AIMessage, HumanMessage
 from apps.entities.chat_models.chat_models import (
     ChatOpenAI,
@@ -19,8 +18,6 @@ from apps.entities.chat_models.chat_models import (
 from apps.entities.chains.merge_output_chain.merge_output_chain import (
     merge_output_chain,
 )
-from apps.infras.utils.loggings.root import logger
-from apps.infras.utils.loggings.usecase import trace
 
 
 class ChatService:
@@ -104,30 +101,23 @@ class ChatService:
         return response
 
     async def process_sub_chains(self, result):
-        try:
-            parallel_tasks = set()
+        parallel_tasks = set()
 
-            for data in result.get("questions", []):
-                for sub_chain in self.get_sub_chains(input_data=data):
-                    task = asyncio.create_task(
-                        sub_chain(
-                            client_information={},
-                        ).arun(
-                            request_information={
-                                **data,
-                                "chat_history": result["chat_history"],
-                                "user_info": result["user_info"],
-                            }
-                        )
+        for data in result.get("questions", []):
+            for sub_chain in self.get_sub_chains(input_data=data):
+                task = asyncio.create_task(
+                    sub_chain(
+                        client_information={},
+                    ).arun(
+                        request_information={
+                            **data,
+                            "chat_history": result["chat_history"],
+                            "user_info": result["user_info"],
+                        }
                     )
-                    parallel_tasks.add(task)
-        except Exception as e:
-            error_trace = traceback.format_exc()
-            raise CustomException(
-                status_code=500, detail=error_trace, trace=error_trace
-            )
-        else:
-            return await asyncio.gather(*parallel_tasks)
+                )
+                parallel_tasks.add(task)
+        return await asyncio.gather(*parallel_tasks)
 
     def get_sub_chains(self, input_data: dict):
         return [
