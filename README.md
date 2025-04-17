@@ -60,6 +60,56 @@ uvicorn main:app --host=0.0.0.0 --port=8000
 
 
 # Feature
+매번 로그를 찍는 과정이 비즈니스로직 코드레벨의 품질을 저하시킴
+
+자동으로 로깅을 하는 LoggingRoute 제작 
+apps/core/routers/log_routes/log_routes.py
+
+```
+## 해당 로그 라우터로 등록하면 chat_router 는 자동으로 로깅 
+chat_router = APIRouter(route_class=LogRoute)
+
+
+class LogRoute(APIRoute):
+    def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
+        original_route_handler = super().get_route_handler()
+
+        async def custom_route_handler(request: Request) -> Response:
+            response: Response = await original_route_handler(request)
+            request_headers = dict(request.headers)
+            request_body = await request.body()
+            request_body = (
+                json.loads(request_body.decode("utf-8")) if request_body else {}
+            )
+            response_body = (
+                json.loads(response.body.decode("utf-8")) if response.body else {}
+            )
+            request_path_params = dict(request.path_params)
+            request_query_params = dict(request.query_params)
+            log_data = {
+                "request": {
+                    "headers": request_headers,
+                    "param": request_query_params,
+                    "body": request_body,
+                    "path_params": request_path_params,
+                },
+                "response": {"body": response_body},
+            }
+
+            original_background = response.background
+            response.background = BackgroundTasks()
+            if original_background:
+                response.background = BackgroundTasks([original_background])
+
+            response.background.add_task(func=log_handler, log_data=log_data)
+            return response
+
+        return custom_route_handler
+
+
+```
+
+
 
 - 매번 로그를 찍는 과정이 코드레벨에서 품질이 저하되므로 데코레이터로 제작  
 - required : ``` pip install python-json-logger ```
