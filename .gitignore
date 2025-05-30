@@ -8,6 +8,9 @@ __pycache__/
 *.so
 *.pdf
 builds/volumes
+src/.env
+src/.env_samples
+
 # Distribution / packaging
 .Python
 build/
@@ -34,6 +37,7 @@ MANIFEST
 *.manifest
 *.spec
 
+/src/chatbot/infra/exeternal_apis/google/credentials
 /apps/credentials
 /dockers
 # Installer logs
