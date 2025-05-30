@@ -10,16 +10,16 @@ LangChain Project
 
 
 ## 구조 
-apis : api endpoit 관리  
-entity : domain 별 각 entity 집합  
-service : 서비스계층의 비즈니스로직   
+application : 유스케이스들의 집합  
+domain : domain별 각 entity 집합     
 infra : 외부 기술(DB,celery 등 외부 기술적요소들의 집합)  
-exception : 예외처리   
+presentation : rest,grpc 등 api 정의  
+exception : 예외처리     
 
 
 ## 동작 흐름 
 **비순환 구조** 
-apis -> service  -> entity | infra 
+presentation -> appliation -> domain | infra
 
 ## 서버 아키텍쳐
 
